@@ -204,6 +204,7 @@ class Trader:
                                       today_trade_results: TradeResults,
                                       rub_before_trade_day: Decimal) -> None:
         logger.info("Today trading summary:")
+        self.__blogger.summary_message()
 
         current_rub_on_depo = self.__operation_service.available_rub_on_account(account_id)
         logger.info(f"RUBs on account before:{rub_before_trade_day}, after:{current_rub_on_depo}")
@@ -212,7 +213,6 @@ class Trader:
         today_percent_profit = (today_profit / rub_before_trade_day) * 100
         logger.info(f"Today Profit:{today_profit} rub ({today_percent_profit} %)")
         self.__blogger.trading_depo_summary_message(rub_before_trade_day, current_rub_on_depo)
-        self.__blogger.summary_message()
 
         if today_trade_results:
             logger.info(f"Today Open Signals:")

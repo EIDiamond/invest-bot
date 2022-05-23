@@ -84,7 +84,8 @@ class Blogger:
 
     def fail_message(self):
         if self.__blog_status:
-            self.__send_text_message(f"Что-то пошло не так. Все позиции надо закрыть вручную.")
+            self.__send_text_message(f"Во время торговли что-то пошло не так. Пробую закрыть позиции. "
+                                     f"Все оставшиеся не закрытые позиции надо закрыть вручную.")
 
     def summary_message(self):
         if self.__blog_status:
