@@ -131,3 +131,4 @@ dmypy.json
 #My
 .idea/*
 TODO.txt
+*.pyc
