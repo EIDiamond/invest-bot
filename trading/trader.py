@@ -216,7 +216,7 @@ class Trader:
 
         if today_trade_results:
             logger.info(f"Today Open Signals:")
-            for figi_key, trade_order_value in today_trade_results.get_current_open_orders():
+            for figi_key, trade_order_value in today_trade_results.get_current_open_orders().items():
                 logger.info(f"Stock: {figi_key}")
 
                 open_order_state = self.__order_service.get_order_state(account_id, trade_order_value.open_order_id)
@@ -227,7 +227,7 @@ class Trader:
             logger.info(f"All open positions should be closed manually.")
 
             logger.info(f"Today Closed Signals:")
-            for figi_key, trade_orders_value in today_trade_results.get_closed_orders():
+            for figi_key, trade_orders_value in today_trade_results.get_closed_orders().items():
                 logger.info(f"Stock: {figi_key}")
                 for trade_order in trade_orders_value:
                     open_order_state = self.__order_service.get_order_state(account_id, trade_order.open_order_id)
