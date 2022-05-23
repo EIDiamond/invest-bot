@@ -1,4 +1,5 @@
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 
 from blog.blogger import Blogger
@@ -11,23 +12,24 @@ from invest_api.services.market_data_service import MarketDataService
 from invest_api.services.operations_service import OperationService
 from invest_api.services.orders_service import OrderService
 from invest_api.services.market_data_stream_service import MarketDataStreamService
-from tg_api.telegram_service import TelegramService
 from trade_system.strategies.strategy_factory import StrategyFactory
 from trading.trade_service import TradeService
 
 # имя конфигурационного файла
 CONFIG_FILE = "settings.ini"
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
-    handlers=[RotatingFileHandler('logs/robot.log', maxBytes=100000000, backupCount=10, encoding='utf-8')],
-    encoding="utf-8"
-)
-
-
 if __name__ == "__main__":
+    if not os.path.exists("logs/"):
+        os.makedirs("logs/")
+
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(module)s - %(levelname)s - %(funcName)s: %(lineno)d - %(message)s",
+        handlers=[RotatingFileHandler('logs/robot.log', maxBytes=100000000, backupCount=10, encoding='utf-8')],
+        encoding="utf-8"
+    )
+
     logger.info("Program start")
 
     try:
