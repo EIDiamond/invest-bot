@@ -59,23 +59,23 @@ class Blogger:
 
     def close_position_message(self, trade_order: TradeOrder) -> None:
         if self.__blog_status and trade_order:
-            signal_type = "лонг" if trade_order.signal.signal_type == SignalType.LONG else "шорт"
+            signal_type = Blogger.__signal_type_to_message_test(trade_order.signal.signal_type)
             self.__send_text_message(
                 f"Закрываем {signal_type} позицию по {self.__trade_strategies[trade_order.signal.figi].ticker}")
 
     def open_position_message(self, trade_order: TradeOrder) -> None:
         if self.__blog_status and trade_order:
-            signal_type = "лонг" if trade_order.signal.signal_type == SignalType.LONG else "шорт"
+            signal_type = Blogger.__signal_type_to_message_test(trade_order.signal.signal_type)
             self.__send_text_message(
                 f"Открываем {signal_type} позицию по {self.__trade_strategies[trade_order.signal.figi].ticker}. "
-                f"Уровень take profit: {trade_order.signal.take_profit_level:.2f} "
-                f"и stop loss: {trade_order.signal.stop_loss_level:.2f}.")
+                f"Уровень take profit: {trade_order.signal.take_profit_level:.2f}. "
+                f"Уровень stop loss: {trade_order.signal.stop_loss_level:.2f}.")
 
     def trading_depo_summary_message(self,
                                      rub_before_trade_day: Decimal,
                                      current_rub_on_depo: Decimal) -> None:
         if self.__blog_status:
-            self.__send_text_message(f"Итоги по размеру депо за тогровую сессию. "
+            self.__send_text_message(f"Итоги по размеру депо за торговую сессию. "
                                      f"Было:{rub_before_trade_day:.2f} стало:{current_rub_on_depo:.2f}")
 
             today_profit = current_rub_on_depo - rub_before_trade_day
@@ -89,7 +89,7 @@ class Blogger:
 
     def summary_message(self):
         if self.__blog_status:
-            self.__send_text_message(f"Подводим итоги торговой сесии:")
+            self.__send_text_message(f"Подводим итоги торговой сессии:")
 
     def final_message(self):
         if self.__blog_status:
@@ -97,13 +97,17 @@ class Blogger:
 
     def summary_open_signal_message(self, trade_order: TradeOrder, open_order_state: OrderState):
         if self.__blog_status:
-            signal_type = "лонг" if trade_order.signal.signal_type == SignalType.LONG else "шорт"
+            signal_type = Blogger.__signal_type_to_message_test(trade_order.signal.signal_type)
+            summary_commission = moneyvalue_to_decimal(open_order_state.executed_commission) + \
+                                 moneyvalue_to_decimal(open_order_state.service_commission)
             self.__send_text_message(f"Открытый {signal_type} сигнал по {self.__trade_strategies[trade_order.signal.figi].ticker}. "
                                      f"Исполнено лотов: {open_order_state.lots_executed}. "
-                                     f"Средняя цена позиции по сделке: "
+                                     f"Средняя цена при открытии позиции: "
                                      f"{moneyvalue_to_decimal(open_order_state.average_position_price):.2f}. "
-                                     f"Итоговая стоимость заявки, включающая все комиссии: "
+                                     f"Полная стоимость сделки: "
                                      f"{moneyvalue_to_decimal(open_order_state.total_order_amount):.2f}. "
+                                     f"Сумма всех комиссий: "
+                                     f"{summary_commission:.2f}. "
                                      f"Позицию надо закрыть вручную.")
 
     def summary_closed_signal_message(self,
@@ -111,12 +115,22 @@ class Blogger:
                                       open_order_state: OrderState,
                                       close_order_state: OrderState):
         if self.__blog_status:
-            signal_type = "лонг" if trade_order.signal.signal_type == SignalType.LONG else "шорт"
+            signal_type = Blogger.__signal_type_to_message_test(trade_order.signal.signal_type)
+            summary_commission = moneyvalue_to_decimal(open_order_state.executed_commission) + \
+                                 moneyvalue_to_decimal(open_order_state.service_commission) + \
+                                 moneyvalue_to_decimal(close_order_state.executed_commission) + \
+                                 moneyvalue_to_decimal(close_order_state.service_commission)
             self.__send_text_message(f"Отработанный {signal_type} сигнал по {self.__trade_strategies[trade_order.signal.figi].ticker}. "
                                      f"Исполнено лотов: {close_order_state.lots_executed}. "
-                                     f"Средняя цена позиции по сделке открытия сигнала: "
+                                     f"Средняя цена при открытии позиции: "
                                      f"{moneyvalue_to_decimal(open_order_state.average_position_price):.2f}. "
-                                     f"Средняя цена позиции по сделке закрытия сигнала: "
+                                     f"Средняя цена при закрытии позиции: "
                                      f"{moneyvalue_to_decimal(close_order_state.average_position_price):.2f}. "
-                                     f"Итоговый профит, включающий все комиссии: "
-                                     f"{moneyvalue_to_decimal(close_order_state.total_order_amount) - moneyvalue_to_decimal(open_order_state.total_order_amount):.2f}. ")
+                                     f"Результат сделки: "
+                                     f"{moneyvalue_to_decimal(close_order_state.total_order_amount) - moneyvalue_to_decimal(open_order_state.total_order_amount):.2f}. "
+                                     f"Сумма всех комиссий: "
+                                     f"{summary_commission:.2f}.")
+
+    @staticmethod
+    def __signal_type_to_message_test(signal_type: SignalType) -> str:
+        return "лонг" if signal_type == SignalType.LONG else "шорт"
