@@ -147,3 +147,5 @@ $ pip install python-telegram-bot --upgrade
 - Добавление retry попыток для запросов в API на сетевые ошибки.
 По личным наблюдениям ошибки сети приходят от API как RequestError без возможности точной идентификации, что ошибка именно сетевая. 
 Например: RequestError(<StatusCode.UNAVAILABLE: (14, 'unavailable')>, 'DNS resolution failed for invest-public-api.tinkoff.ru: UNAVAILABLE: OS Error', None) details=DNS resolution failed for invest-public-api.tinkoff.ru: UNAVAILABLE: OS Error
+- Добавление retry попыток для telegram API на сетевые ошибки и timeout (после асинхронных вызовов).
+- Востановление информации о сделках по открытым позициям. В теории, информации достаточно, чтобы все востановить и после этого можно отменить закрытие всех позиций в начале и в конце дня. Но тогда, это уже будет перенос позиции через ночь, а это не совсем интрадей торговля. (Есть над чем подумать)    
