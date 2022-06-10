@@ -33,9 +33,9 @@ Do not forget to take TOKEN for API trading.
 ### Telegram (optional)
 Register your bot via @BotFather.
 
-Create a chat and get `chat_id`.
+Create a chat and get chat_id.
 
-PS. Please use Google to find detailed instruction how to get `chat_id`.    
+PS. Please use Google to find detailed instruction how to get chat_id.    
 
 ### Required configuration (minimal)
 1. Open `settings.ini` file
@@ -71,10 +71,10 @@ Settings for trade strategies.
 
 Section STRATEGY_ticker_name:
 
-- STRATEGY_NAME - name of algorithm
-- TICKER - ticker name (human-friendly name for telegram messages)
-- FIGI - figi of stock. Required for API
-- MAX_LOTS_PER_ORDER - Maximum count of lots per order
+- `STRATEGY_NAME` - name of algorithm
+- `TICKER` - ticker name (human-friendly name for telegram messages)
+- `FIGI` - figi of stock. Required for API
+- `MAX_LOTS_PER_ORDER` - Maximum count of lots per order
 
 Section STRATEGY_ticker_name_SETTINGS:
 
