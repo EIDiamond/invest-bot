@@ -73,13 +73,13 @@ if __name__ == "__main__":
                         operation_service=operation_service,
                         order_service=order_service,
                         stream_service=stream_service,
-                        market_data_service=market_data_service,
-                        blog_settings=config.blog_settings,
-                        trade_strategy_settings=config.trade_strategy_settings
+                        market_data_service=market_data_service
                     ). start_trading(
                         config.account_settings,
                         config.trading_settings,
-                        trade_strategies
+                        trade_strategies,
+                        config.blog_settings,
+                        config.trade_strategy_settings
                     )
 
                 case _:

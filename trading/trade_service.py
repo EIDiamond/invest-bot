@@ -31,9 +31,7 @@ class TradeService:
             operation_service: OperationService,
             order_service: OrderService,
             stream_service: MarketDataStreamService,
-            market_data_service: MarketDataService,
-            blog_settings: BlogSettings,
-            trade_strategy_settings: list[StrategySettings]
+            market_data_service: MarketDataService
 
     ) -> None:
         self.__account_service = account_service
@@ -43,14 +41,14 @@ class TradeService:
         self.__order_service = order_service
         self.__stream_service = stream_service
         self.__market_data_service = market_data_service
-        self.__blog_settings = blog_settings
-        self.__trade_strategy_settings = trade_strategy_settings
 
     def start_trading(
             self,
             account_settings: AccountSettings,
             trading_settings: TradingSettings,
-            strategies: list[IStrategy]
+            strategies: list[IStrategy],
+            blog_settings: BlogSettings,
+            trade_strategy_settings: list[StrategySettings]
     ) -> None:
         try:
             logger.info("Finding account for trading")
@@ -66,14 +64,23 @@ class TradeService:
             logger.error(f"Start trading error: {repr(ex)}")
             return None
 
-        self.__working_loop(account_id, trading_settings, strategies, account_settings.min_rub_on_account)
+        self.__working_loop(
+            account_id,
+            trading_settings,
+            strategies,
+            account_settings.min_rub_on_account,
+            blog_settings,
+            trade_strategy_settings
+        )
 
     def __working_loop(
             self,
             account_id: str,
             trading_settings: TradingSettings,
             strategies: list[IStrategy],
-            min_rub: int
+            min_rub: int,
+            blog_settings: BlogSettings,
+            trade_strategy_settings: list[StrategySettings]
     ) -> None:
         logger.info("Start every day trading")
 
@@ -105,7 +112,7 @@ class TradeService:
                         order_service=self.__order_service,
                         stream_service=self.__stream_service,
                         market_data_service=self.__market_data_service,
-                        blogger=Blogger(self.__blog_settings, self.__trade_strategy_settings)
+                        blogger=Blogger(blog_settings, trade_strategy_settings)
                     ).trade_day(account_id, trading_settings, strategies, end_time, min_rub)
 
                     logger.info("Trading day has been completed")
