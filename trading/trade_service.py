@@ -3,7 +3,7 @@ import logging
 import time
 
 from blog.blogger import Blogger
-from configuration.settings import AccountSettings, TradingSettings
+from configuration.settings import AccountSettings, TradingSettings, BlogSettings, StrategySettings
 from invest_api.services.accounts_service import AccountService
 from invest_api.services.client_service import ClientService
 from invest_api.services.instruments_service import InstrumentService
@@ -32,7 +32,9 @@ class TradeService:
             order_service: OrderService,
             stream_service: MarketDataStreamService,
             market_data_service: MarketDataService,
-            blogger: Blogger
+            blog_settings: BlogSettings,
+            trade_strategy_settings: list[StrategySettings]
+
     ) -> None:
         self.__account_service = account_service
         self.__client_service = client_service
@@ -41,7 +43,8 @@ class TradeService:
         self.__order_service = order_service
         self.__stream_service = stream_service
         self.__market_data_service = market_data_service
-        self.__blogger = blogger
+        self.__blog_settings = blog_settings
+        self.__trade_strategy_settings = trade_strategy_settings
 
     def start_trading(
             self,
@@ -102,7 +105,7 @@ class TradeService:
                         order_service=self.__order_service,
                         stream_service=self.__stream_service,
                         market_data_service=self.__market_data_service,
-                        blogger=self.__blogger
+                        blogger=Blogger(self.__blog_settings, self.__trade_strategy_settings)
                     ).trade_day(account_id, trading_settings, strategies, end_time, min_rub)
 
                     logger.info("Trading day has been completed")

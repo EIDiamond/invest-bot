@@ -2,7 +2,6 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from blog.blogger import Blogger
 from configuration.configuration import ProgramConfiguration, WorkingMode
 from history_tests.history_manager import HistoryTestsManager
 from invest_api.services.accounts_service import AccountService
@@ -63,9 +62,9 @@ if __name__ == "__main__":
 
                 case WorkingMode.TRADE_MODE:
                     logger.info(f"Blog settings: {config.blog_settings}")
-                    blogger = Blogger(config.blog_settings, config.trade_strategy_settings)
 
-                    trade_strategies = [StrategyFactory.new_factory(x.name, x) for x in config.trade_strategy_settings]
+                    trade_strategies = \
+                        [StrategyFactory.new_factory(x.name, x) for x in config.trade_strategy_settings]
 
                     TradeService(
                         account_service=account_service,
@@ -75,7 +74,8 @@ if __name__ == "__main__":
                         order_service=order_service,
                         stream_service=stream_service,
                         market_data_service=market_data_service,
-                        blogger=blogger
+                        blog_settings=config.blog_settings,
+                        trade_strategy_settings=config.trade_strategy_settings
                     ). start_trading(
                         config.account_settings,
                         config.trading_settings,
