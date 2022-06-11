@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class OrderService:
+    """
+    The class encapsulate tinkoff order service api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
@@ -44,6 +47,9 @@ class OrderService:
             count_lots: int,
             is_buy: bool
     ) -> str:
+        """
+        Post market order
+        """
         logger.info(
             f"Post market order account_id: {account_id}, "
             f"figi: {figi}, count_lots: {count_lots}, is_buy: {is_buy}"

@@ -9,7 +9,8 @@ class StrategySettings:
     figi: str = ""
     ticker: str = ""
     max_lots_per_order: int = 1
-    # для гибкости конкретные настройки стратегии представлены в виде словаря
+    # All internal strategy settings are represented as dict. A strategy class have to parse it himself.
+    # Here, we avoid any strong dependencies and obligations
     settings: dict = field(default_factory=dict)
     lot_size: int = 1
     short_enabled_flag: bool = True

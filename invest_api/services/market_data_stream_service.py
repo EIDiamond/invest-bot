@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class MarketDataStreamService:
+    """
+    The class encapsulate tinkoff market data stream (gRPC) service api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
@@ -22,6 +25,9 @@ class MarketDataStreamService:
             figies: list[str],
             trade_before_time: datetime
     ) -> Generator[Candle, None, None]:
+        """
+        The method starts gRPC stream and return candles
+        """
         logger.debug(f"Starting candles stream")
 
         self.__stop_candles_stream()
@@ -43,7 +49,7 @@ class MarketDataStreamService:
             for market_data in self.__market_data_candles_stream:
                 logger.debug(f"market_data: {market_data}")
 
-                # торговля идет до конкретного времени trade_before_time (и да это костыль)
+                # trading will stop at trade_before_time
                 if datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) >= trade_before_time:
                     logger.debug(f"Time to stop candle stream")
                     self.__stop_candles_stream()

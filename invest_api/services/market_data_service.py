@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class MarketDataService:
+    """
+    The class encapsulate tinkoff market data service api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
@@ -24,14 +27,13 @@ class MarketDataService:
             return status
 
     def is_stock_ready_for_trading(self, figi: str) -> bool:
-        # признак доступности акций для торговли:
-        # разрешены лимитные заявки
-        # разрешены рыночные заявки
-        # можно торговать по API
-        # статус - обычная торговля
-        # робот не торгует в другие статусы, даже если выставление заявок возможно
-        # например: дискретный аукцион (не инвестиционная рекомендация :) )
-
+        """
+        Calculate and return decision does stock available for trading today:
+        Limit orders are allowed
+        Market orders are allowed
+        Trading by API are allowed
+        Status is NORMAL_TRADING (bot is skipping other statuses)
+        """
         status = self.__get_trading_status(figi)
 
         return status.limit_order_available_flag and \

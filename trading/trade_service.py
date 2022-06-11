@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 
 
 class TradeService:
+    """
+    Represent logic keep trading going
+    """
     def __init__(
             self,
             account_service: AccountService,
@@ -77,16 +80,15 @@ class TradeService:
             try:
                 is_trading_day, start_time, end_time = \
                     self.__instrument_service.moex_today_trading_schedule()
-                # загушка для тестов
+                # for tests
                 # is_trading_day, start_time, end_time = \
                 #    True, \
                 #    datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=10), \
                 #    datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) + datetime.timedelta(minutes=12)
 
-                # начинаем торговлю, если сегодня торговый день и торги еще не закончились
                 if is_trading_day and datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) <= end_time:
                     logger.info(f"Today is trading day. Trading will start after {start_time}")
-                    # спим до начала торгов плюс немного секунд из конфигурации
+
                     TradeService.__sleep_to(
                         start_time + datetime.timedelta(seconds=trading_settings.delay_start_after_open)
                     )
@@ -114,7 +116,6 @@ class TradeService:
 
     @staticmethod
     def __sleep_to_next_morning() -> None:
-        # спим до начала основной сессии на Московской бирже
         future = datetime.datetime.utcnow() + datetime.timedelta(days=1)
         next_time = datetime.datetime(year=future.year, month=future.month, day=future.day,
                                       hour=6, minute=0, tzinfo=datetime.timezone.utc)

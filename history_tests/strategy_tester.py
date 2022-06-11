@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class StrategyTester:
+    """
+    Class encapsulate test logic on historical candles
+    """
     def __init__(self, strategy: IStrategy) -> None:
         self.__strategy = strategy
 
@@ -26,13 +29,13 @@ class StrategyTester:
         test_candles_pack = []
 
         for candle in candles:
-            # проверка сигналов на отработку take или stop
+            # Check price from candle for take or stop price level
             for signal_status in test_result.get_proposed_signals():
                 high = quotation_to_decimal(candle.high)
                 low = quotation_to_decimal(candle.low)
 
-                # логика проверки - если диапазон high и low подходит под уровень stop или take, то они отрабатывают
-                # Мы не знаем как цена шла в свече, поэтому по худшему сценарию первым проверяем на стоп
+                # Logic is:
+                # if stop or take price level is between high and low, then stop or take will be executed
                 if low <= signal_status.signal.stop_loss_level <= high:
                     signal_status.stop_loss_executed()
 
@@ -47,10 +50,8 @@ class StrategyTester:
                     logger.info(f"CANDLE: {candle}")
                     logger.info(f"Signal: {signal_status.signal}")
 
-            # стратегии могут принимать пачку свечей для анализа. По умолчанию в пачке - 1 свеча на анализ
             test_candles_pack.append(candle)
 
-            # набрав пачку отдаем их на анализ
             if len(test_candles_pack) >= portion:
                 signal = self.__strategy.analyze_candles(test_candles_pack)
                 test_candles_pack = []

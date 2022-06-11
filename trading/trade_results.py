@@ -12,9 +12,10 @@ class TradeOrder:
     close_order_id: str = ""
 
 
-# храним заявки и сигналы за торги
-# в один момент может быть только одна заявка по акции + история заявок
 class TradeResults:
+    """
+    Keep history of orders by trade day
+    """
     def __init__(self) -> None:
         self.__current_trade_orders: dict[str, TradeOrder] = dict()
         self.__old_trade_orders: dict[str, list[TradeOrder]] = dict()

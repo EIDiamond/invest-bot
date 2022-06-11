@@ -13,12 +13,18 @@ logger = logging.getLogger(__name__)
 
 
 class InstrumentService:
+    """
+    The class encapsulate tinkoff instruments api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
 
     def moex_today_trading_schedule(self) -> (bool, datetime, datetime):
-        # информация о торговом дне и расписании торгов на Московский бирже (основная сессия) на сегодня
+        """
+        :return: Information about trading day status, datetime trading day start, datetime trading day end
+        (both on today)
+        """
         for schedule in self.__trading_schedules(
                 exchange=moex_exchange_name(),
                 _from=datetime.datetime.utcnow(),
@@ -55,6 +61,9 @@ class InstrumentService:
 
     @invest_error_logging
     def share_by_figi(self, figi: str) -> ShareSettings:
+        """
+        :return: Information about share settings by it figi
+        """
         with Client(self.__token, app_name=self.__app_name) as client:
             logger.debug(f"ShareBy figi: {figi}:")
 

@@ -25,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 class Trader:
+    """
+    The class encapsulate main trade logic.
+    """
     def __init__(
             self,
             client_service: ClientService,
@@ -58,7 +61,6 @@ class Trader:
             logger.info("No shares to trade today.")
             return None
 
-        # Отмена всех поручений и продажа всех позиций - переда началом торгов (интрадей торговля)
         self.__clear_all_positions(account_id, today_trade_strategies)
 
         rub_before_trade_day = self.__operation_service.available_rub_on_account(account_id)
@@ -88,13 +90,10 @@ class Trader:
 
         try:
             if today_trade_results:
-                # Закрываем все НЕ закрытые позиции в конце для (интрадей торговля)
                 for key_figi, value_order_id in self.__clear_all_positions(account_id, today_trade_strategies).items():
                     trade_order = today_trade_results.close_position(key_figi, value_order_id)
                     self.__blogger.close_position_message(trade_order)
             else:
-                # что-то пошло не так и нет результатов торговли
-                # пытаемся отменить все поручения и закрыть все позиции, если они есть
                 self.__clear_all_positions(account_id, today_trade_strategies)
         except Exception as ex:
             logger.error(f"Finishing trading error: {repr(ex)}")
@@ -114,11 +113,10 @@ class Trader:
     ) -> TradeResults:
         logger.info(f"Subscribe and read Candles for {strategies.keys()}")
 
-        # Время окончания торговли: окончание основной сессии минус немного секунд из конфигурации
-        # Надо еще успеть закрыть все позиции и отменить поручения
+        # End trading before close trade session
         trade_before_time: datetime = \
             trade_day_end_time - datetime.timedelta(seconds=trading_settings.stop_trade_before_close)
-        # время окончания выработки новых сигналов: окончание основной сессии минус немного минут из конфигурации
+
         signals_before_time: datetime = \
             trade_day_end_time - datetime.timedelta(minutes=trading_settings.stop_signals_before_close)
         logger.debug(f"Stop time: signals - {signals_before_time}, trading - {trade_before_time}")
@@ -129,19 +127,17 @@ class Trader:
         for candle in self.__stream_service.start_candles_stream(list(strategies.keys()), trade_before_time):
             current_figi_candle = current_candles.setdefault(candle.figi, candle)
             if candle.time < current_figi_candle.time:
-                # может прийти "уточняющая свеча" с такими свечами не работаем
+                # it can be based on API documentation
                 logger.debug("Skip candle from past.")
                 continue
 
-            # проверяем сигнал на отработку stop или take
+            # check price from candle for take or stop price levels
             current_trade_order = today_trade_results.get_current_trade_order(candle.figi)
             if current_trade_order:
                 high, low = quotation_to_decimal(candle.high), quotation_to_decimal(candle.low)
 
-                # логика проверки - если диапазон high и low подходит под уровень stop или take, то они отрабатывают
-                # мы не знаем как цена шла в свече, поэтому по худшему сценарию первым проверяем на стоп
-                # в данном случае более точно и быстрее могут отрабатывать stop заявки,
-                # но создатели API просили стоп заявками не пользоваться
+                # Logic is:
+                # if stop or take price level is between high and low, then stop or take will be executed
                 if low <= current_trade_order.signal.stop_loss_level <= high:
                     logger.info(f"STOP LOSS: {current_trade_order}")
                     close_order_id = \
@@ -160,9 +156,6 @@ class Trader:
                         trade_order = today_trade_results.close_position(candle.figi, close_order_id)
                         self.__blogger.close_position_message(trade_order)
 
-            # анализируем свечу на наличие сигнала
-            # сменилось время между свечами, можно считать предыдушею свечу итоговой по диапазону
-            # время генерации сигналов еще не прошло
             if candle.time > current_figi_candle.time and \
                     datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) <= signals_before_time:
                 signal_new = strategies[candle.figi].analyze_candles(
@@ -257,7 +250,9 @@ class Trader:
             price: Decimal,
             share_lot_size: int
     ) -> int:
-        # расчет колличества лотов на операцию с учетом настройки максимального колличества лотов из конфигурации
+        """
+        Calculate counts of lots for order
+        """
         current_rub_on_depo = self.__operation_service.available_rub_on_account(account_id)
 
         available_lots = int(current_rub_on_depo / (share_lot_size * price))
@@ -290,7 +285,7 @@ class Trader:
             logger.info(f"Current positions: {current_positions}")
             for position in current_positions:
                 if position.figi in figies:
-                    # проверка что акцией можно торговать
+                    # Check a stock
                     if self.__market_data_service.is_stock_ready_for_trading(position.figi):
                         result[position.figi] = self.__order_service.post_market_order(
                             account_id=account_id,
@@ -302,11 +297,9 @@ class Trader:
         return result
 
     def __get_today_strategies(self, strategies: list[IStrategy]) -> dict[str, IStrategy]:
-        # выбираем акции на торговлю сегодня:
-        # не внебиржевая ценная бумага
-        # разрешена покупка и продажа
-        # доступна торговля через API
-
+        """
+        Check and Select stocks for trading today.
+        """
         logger.info("Check shares and strategy settings")
         today_trade_strategy: dict[str, IStrategy] = dict()
 
@@ -320,7 +313,7 @@ class Trader:
                     and share_settings.api_trade_available_flag:
                 logger.debug(f"Share is ready for trading")
 
-                # обновляем информацию на сегодня о размере лота и возможности шотр торговли (актуально в последнее время)
+                # refresh information by latest info
                 strategy.update_lot_count(share_settings.lot)
                 strategy.update_short_status(share_settings.short_enabled_flag)
 

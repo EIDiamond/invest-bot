@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class StopOrderService:
+    """
+    The class encapsulate tinkoff stop order service api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name

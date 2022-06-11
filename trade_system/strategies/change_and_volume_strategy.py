@@ -14,8 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 class ChangeAndVolumeStrategy(IStrategy):
-    # константы для считывания полей из конфигурации
-    # для гибкости часть полей конфигурации не вынесены в классов
+    """
+    Example of trade strategy.
+    IMPORTANT: DO NOT USE IT FOR REAL TRADING!
+    """
+    # Consts for read and parse dict with strategy configuration
 
     __SIGNAL_VOLUME_NAME = "SIGNAL_VOLUME"
     __SIGNAL_MIN_CANDLES_NAME = "SIGNAL_MIN_CANDLES"
@@ -51,6 +54,9 @@ class ChangeAndVolumeStrategy(IStrategy):
         self.__settings.short_enabled_flag = status
 
     def analyze_candles(self, candles: list[HistoricCandle]) -> Signal:
+        """
+        The method analyzes candles and returns his decision.
+        """
         logger.debug(f"Start analyze candles for {self.settings.figi} strategy {__name__}. "
                      f"Candles count: {len(candles)}")
 
@@ -76,18 +82,17 @@ class ChangeAndVolumeStrategy(IStrategy):
 
         sorted(self.__recent_candles, key=lambda x: x.time)
 
-        # убираем лишние свечи из кеша, только __signal_min_candles последних свечей в кеше
+        # keep only __signal_min_candles candles in cache
         if len(self.__recent_candles) > self.__signal_min_candles:
             self.__recent_candles = self.__recent_candles[len(self.__recent_candles) - self.__signal_min_candles:]
 
         return True
 
     def __is_match_long(self) -> bool:
-        # Условие на сигнал в Long:
-        # все свечи в кеше соотвествуют условию
-        # зеленая свеча
-        # длина верхнего хвоста свечи меньше чем __signal_min_tail
-        # обьем торгов выше чем __signal_volume
+        """
+        Check for LONG signal. All candles in cache:
+        Green candle, tail lower than __signal_min_tail, volume more that __signal_volume
+        """
         for candle in self.__recent_candles:
             logger.debug(f"Recent Candle to analyze {self.settings.figi} LONG: {candle}")
             open_, high, close, low = quotation_to_decimal(candle.open), quotation_to_decimal(candle.high), \
@@ -108,11 +113,10 @@ class ChangeAndVolumeStrategy(IStrategy):
         return False
 
     def __is_match_short(self) -> bool:
-        # Условие на сигнал в Short:
-        # все свечи в кеше соотвествуют условию
-        # красная свеча
-        # длина нижнего хвоста свечи меньше чем __signal_min_tail
-        # обьем торгов выше чем __signal_volume
+        """
+        Check for LONG signal. All candles in cache:
+        Red candle, tail lower than __signal_min_tail, volume more that __signal_volume
+        """
         for candle in self.__recent_candles:
             logger.debug(f"Recent Candle to analyze {self.settings.figi} SHORT: {candle}")
             open_, high, close, low = quotation_to_decimal(candle.open), quotation_to_decimal(candle.high), \
@@ -138,8 +142,7 @@ class ChangeAndVolumeStrategy(IStrategy):
             profit_multy: Decimal,
             stop_multy: Decimal
     ) -> Signal:
-        # даем сигнал: take и stop с коэфицентом из конфигурации
-        # от цены закрытия свечи (ожидаемо ближайшая цена к текушей на торгах)
+        # take and stop based on configuration by close price level (close for last price)
         last_candle = self.__recent_candles[len(self.__recent_candles) - 1]
 
         signal = Signal(

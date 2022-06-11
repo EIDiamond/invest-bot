@@ -11,20 +11,22 @@ logger = logging.getLogger(__name__)
 
 
 class AccountService:
+    """
+    The class encapsulate tinkoff account api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
 
     @invest_error_logging
     def trading_account_id(self, account_settings: AccountSettings) -> str:
-        # метод возврашает подходяший аккаунт для трейдинга:
-        # полные права (возможность выставлять заявки)
-        # тип обычный аккаунт (НЕ ИИС с его ограничениями и т.д.)
-        # аккаунт открыт и готов к торговле
-        # liquid_portfolio больше чем настроено в конфигурации
-        # зеленый статус по марже (liquid > starting_margin)
-        # если таких несколько, то выбирается там где больше liquid_portfolio
-
+        """
+        Method returns appropriate account id for trading:
+        Full rights, common type (avoid IIS etc), account is open and ready,
+        liquid_portfolio more that configured,
+        green margin status (liquid > starting_margin)
+        Account with high liquid_portfolio will be selected if more that one found
+        """
         result = None
         max_liquid_portfolio = -1
 
@@ -53,7 +55,9 @@ class AccountService:
 
     @invest_error_logging
     def __verify(self) -> bool:
-        # верификация токена и доступности API путем запроса различной информации
+        """
+        Verification method. Just connect and read some settings.
+        """
         logger.info(f"Start client verification. App name: {self.__app_name}")
 
         with Client(self.__token, app_name=self.__app_name) as client:
@@ -83,6 +87,10 @@ class AccountService:
         return True
 
     def verify_token(self) -> bool:
+        """
+        Tinkoff API token verification
+        :return: True - token is good, False - Try another one.
+        """
         try:
             return self.__verify()
         except Exception as ex:

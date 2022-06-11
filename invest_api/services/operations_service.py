@@ -13,11 +13,17 @@ logger = logging.getLogger(__name__)
 
 
 class OperationService:
+    """
+    The class encapsulate tinkoff operations service api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
 
     def available_rub_on_account(self, account_id: str) -> Decimal:
+        """
+        Return available amount of rub on account
+        """
         position = self.__get_positions(account_id)
 
         if position:
@@ -29,6 +35,9 @@ class OperationService:
         return None
 
     def positions_securities(self, account_id: str) -> list[PositionsSecurities]:
+        """
+        :return: All open positions for account
+        """
         positions = self.__get_positions(account_id)
 
         return positions.securities if positions else None

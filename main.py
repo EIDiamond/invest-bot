@@ -15,7 +15,7 @@ from invest_api.services.market_data_stream_service import MarketDataStreamServi
 from trade_system.strategies.strategy_factory import StrategyFactory
 from trading.trade_service import TradeService
 
-# имя конфигурационного файла
+# the configuration file name
 CONFIG_FILE = "settings.ini"
 
 if __name__ == "__main__":
@@ -46,14 +46,11 @@ if __name__ == "__main__":
         stream_service = MarketDataStreamService(config.tinkoff_token, config.tinkoff_app_name)
         market_data_service = MarketDataService(config.tinkoff_token, config.tinkoff_app_name)
 
-        # верификация токена и рабочего API
         if account_service.verify_token():
             logger.info(f"Working mode is {config.working_mode.name} ({config.working_mode})")
 
-            # выбор режима работы программы
             match config.working_mode:
                 case WorkingMode.HISTORICAL_MODE:
-                    # тестируем тестовую стратегию
                     test_strategy = StrategyFactory.new_factory(
                         config.test_strategy_settings.name,
                         config.test_strategy_settings
@@ -65,11 +62,9 @@ if __name__ == "__main__":
                     pass
 
                 case WorkingMode.TRADE_MODE:
-                    # загружем блоггера для написания постов в чат в Telegram
                     logger.info(f"Blog settings: {config.blog_settings}")
                     blogger = Blogger(config.blog_settings, config.trade_strategy_settings)
 
-                    # загружаем стратегии для торгов и запускаем бота на торги
                     trade_strategies = [StrategyFactory.new_factory(x.name, x) for x in config.trade_strategy_settings]
 
                     TradeService(

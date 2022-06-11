@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class ClientService:
+    """
+    The class encapsulate tinkoff client api
+    """
     def __init__(self, token: str, app_name: str) -> None:
         self.__token = token
         self.__app_name = app_name
@@ -23,6 +26,7 @@ class ClientService:
             from_days: int,
             interval: CandleInterval
     ) -> list[HistoricCandle]:
+        """Download and return all requested historical candles"""
         result: list[HistoricCandle] = []
 
         from_ = now() - timedelta(days=from_days)
@@ -44,6 +48,7 @@ class ClientService:
 
     @invest_error_logging
     def cancel_all_orders(self, account_id: str) -> None:
+        """ Cancel all open orders. """
         logger.info(f"Cancel all orders for account id: {account_id}")
 
         with Client(self.__token, app_name=self.__app_name) as client:

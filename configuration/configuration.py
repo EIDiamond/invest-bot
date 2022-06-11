@@ -7,15 +7,21 @@ __all__ = ("ProgramConfiguration", "WorkingMode")
 
 
 @enum.unique
-class WorkingMode(enum.IntEnum):  # Режимы работы программы
-    HISTORICAL_MODE = 0  # 0 - тестирование стртатегии на исторических свечах
-    SANDBOX_MODE = 1  # 1 - трейдинг в режиме Песочницы
-    TRADE_MODE = 2  # 2 - полноценный трейдинг
+class WorkingMode(enum.IntEnum):
+    """
+    Bot working modes
+    """
+    HISTORICAL_MODE = 0  # 0 - test on historical candles mode
+    SANDBOX_MODE = 1  # 1 - reserved
+    TRADE_MODE = 2  # 2 - real trading mode
 
 
 class ProgramConfiguration:
+    """
+    Represent all bot configuration
+    """
     def __init__(self, file_name: str) -> None:
-        # Конфигурация в виде классического ini файла
+        # classic ini file
         config = ConfigParser()
         config.read(file_name)
 
@@ -41,7 +47,7 @@ class ProgramConfiguration:
             stop_signals_before_close=int(config["TRADING_SETTINGS"]["STOP_SIGNALS_BEFORE_EXCHANGE_CLOSE_MINUTES"])
         )
 
-        # Отдельные настройки для тестирования стратегии в режиме тестирования
+        # Here is separate section for test purposes
         self.__test_strategy_settings = \
             StrategySettings(
                 name=config["TEST_STRATEGY"]["STRATEGY_NAME"],
@@ -51,7 +57,6 @@ class ProgramConfiguration:
                 settings=config["TEST_STRATEGY_SETTINGS"]
             )
 
-        # Динамическое чтение стратегий (1 старатегия - 1 эмитент) для полноценных торгов
         self.__trade_strategy_settings = []
         for strategy_section in config.sections():
             if strategy_section.startswith("STRATEGY_") and not strategy_section.endswith("_SETTINGS"):
