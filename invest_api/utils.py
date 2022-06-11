@@ -16,15 +16,21 @@ def moex_exchange_name() -> str:
 
 
 def moneyvalue_to_decimal(money_value: MoneyValue) -> Decimal:
-    return quotation_to_decimal(Quotation(units=money_value.units,
-                                          nano=money_value.nano))
+    return quotation_to_decimal(
+        Quotation(
+            units=money_value.units,
+            nano=money_value.nano
+        )
+    )
 
 
 def decimal_to_moneyvalue(decimal: Decimal, currency: str = rub_currency_name()) -> MoneyValue:
     quotation = decimal_to_quotation(decimal)
-    return MoneyValue(currency=currency,
-                      units=quotation.units,
-                      nano=quotation.nano)
+    return MoneyValue(
+        currency=currency,
+        units=quotation.units,
+        nano=quotation.nano
+    )
 
 
 def generate_order_id() -> str:

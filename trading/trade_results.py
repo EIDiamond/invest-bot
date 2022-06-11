@@ -11,6 +11,7 @@ class TradeOrder:
     signal: Signal
     close_order_id: str = ""
 
+
 # храним заявки и сигналы за торги
 # в один момент может быть только одна заявка по акции + история заявок
 class TradeResults:
@@ -27,11 +28,12 @@ class TradeResults:
     def get_current_trade_order(self, figi: str) -> TradeOrder:
         return self.__current_trade_orders.get(figi, None)
 
-    def open_position(self,
-                      figi: str,
-                      open_order_id: str,
-                      signal: Signal) \
-            -> TradeOrder:
+    def open_position(
+            self,
+            figi: str,
+            open_order_id: str,
+            signal: Signal
+    ) -> TradeOrder:
         current_trade_order = self.get_current_trade_order(figi)
 
         if not current_trade_order:
@@ -42,10 +44,11 @@ class TradeResults:
 
         return current_trade_order
 
-    def close_position(self,
-                       figi: str,
-                       close_order_id: str) \
-            -> TradeOrder:
+    def close_position(
+            self,
+            figi: str,
+            close_order_id: str
+    ) -> TradeOrder:
         current_order = self.__current_trade_orders.pop(figi, None)
 
         if current_order:

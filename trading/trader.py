@@ -25,15 +25,16 @@ logger = logging.getLogger(__name__)
 
 
 class Trader:
-    def __init__(self,
-                 client_service: ClientService,
-                 instrument_service: InstrumentService,
-                 operation_service: OperationService,
-                 order_service: OrderService,
-                 stream_service: MarketDataStreamService,
-                 market_data_service: MarketDataService,
-                 blogger: Blogger
-                 ) -> None:
+    def __init__(
+            self,
+            client_service: ClientService,
+            instrument_service: InstrumentService,
+            operation_service: OperationService,
+            order_service: OrderService,
+            stream_service: MarketDataStreamService,
+            market_data_service: MarketDataService,
+            blogger: Blogger
+    ) -> None:
 
         self.__client_service = client_service
         self.__instrument_service = instrument_service
@@ -43,13 +44,14 @@ class Trader:
         self.__market_data_service = market_data_service
         self.__blogger = blogger
 
-    def trade_day(self,
-                  account_id: str,
-                  trading_settings: TradingSettings,
-                  strategies: list[IStrategy],
-                  trade_day_end_time: datetime,
-                  min_rub: int
-                  ) -> None:
+    def trade_day(
+            self,
+            account_id: str,
+            trading_settings: TradingSettings,
+            strategies: list[IStrategy],
+            trade_day_end_time: datetime,
+            min_rub: int
+    ) -> None:
         logger.info("Start preparations for trading today")
         today_trade_strategies = self.__get_today_strategies(strategies)
         if not today_trade_strategies:
@@ -73,7 +75,8 @@ class Trader:
                 account_id,
                 trading_settings,
                 today_trade_strategies,
-                trade_day_end_time)
+                trade_day_end_time
+            )
             logger.debug("Test Results:")
             logger.debug(f"Current: {today_trade_results.get_current_open_orders()}")
             logger.debug(f"Old: {today_trade_results.get_closed_orders()}")
@@ -102,12 +105,13 @@ class Trader:
         except Exception as ex:
             logger.error(f"Summary trading day error: {repr(ex)}")
 
-    def __trading(self,
-                  account_id: str,
-                  trading_settings: TradingSettings,
-                  strategies: dict[str, IStrategy],
-                  trade_day_end_time: datetime) \
-            -> TradeResults:
+    def __trading(
+            self,
+            account_id: str,
+            trading_settings: TradingSettings,
+            strategies: dict[str, IStrategy],
+            trade_day_end_time: datetime
+    ) -> TradeResults:
         logger.info(f"Subscribe and read Candles for {strategies.keys()}")
 
         # Время окончания торговли: окончание основной сессии минус немного секунд из конфигурации
@@ -177,7 +181,8 @@ class Trader:
                             account_id,
                             strategies[candle.figi].settings.max_lots_per_order,
                             quotation_to_decimal(candle.close),
-                            strategies[candle.figi].settings.lot_size)
+                            strategies[candle.figi].settings.lot_size
+                        )
 
                         logger.debug(f"Available lots: {available_lots}")
                         if available_lots:
@@ -199,10 +204,12 @@ class Trader:
 
         return today_trade_results
 
-    def __summary_today_trade_results(self,
-                                      account_id: str,
-                                      today_trade_results: TradeResults,
-                                      rub_before_trade_day: Decimal) -> None:
+    def __summary_today_trade_results(
+            self,
+            account_id: str,
+            today_trade_results: TradeResults,
+            rub_before_trade_day: Decimal
+    ) -> None:
         logger.info("Today trading summary:")
         self.__blogger.summary_message()
 
@@ -243,11 +250,13 @@ class Trader:
 
         self.__blogger.final_message()
 
-    def __open_position_lots_count(self,
-                                   account_id: str,
-                                   max_lots_per_order: int,
-                                   price: Decimal,
-                                   share_lot_size: int) -> int:
+    def __open_position_lots_count(
+            self,
+            account_id: str,
+            max_lots_per_order: int,
+            price: Decimal,
+            share_lot_size: int
+    ) -> int:
         # расчет колличества лотов на операцию с учетом настройки максимального колличества лотов из конфигурации
         current_rub_on_depo = self.__operation_service.available_rub_on_account(account_id)
 
@@ -255,10 +264,11 @@ class Trader:
 
         return available_lots if max_lots_per_order > available_lots else max_lots_per_order
 
-    def __clear_all_positions(self,
-                              account_id: str,
-                              strategies: dict[str, IStrategy]
-                              ) -> dict[str, str]:
+    def __clear_all_positions(
+            self,
+            account_id: str,
+            strategies: dict[str, IStrategy]
+    ) -> dict[str, str]:
         logger.info("Clear all orders and close all open positions")
 
         logger.debug("Cancel all order.")
@@ -267,10 +277,12 @@ class Trader:
         logger.debug("Close all positions.")
         return self.__close_position_by_figi(account_id, strategies.keys(), strategies)
 
-    def __close_position_by_figi(self,
-                                 account_id: str,
-                                 figies: list[str],
-                                 strategies: dict[str, IStrategy]) -> dict[str, str]:
+    def __close_position_by_figi(
+            self,
+            account_id: str,
+            figies: list[str],
+            strategies: dict[str, IStrategy]
+    ) -> dict[str, str]:
         result: dict[str, str] = dict()
         current_positions = self.__operation_service.positions_securities(account_id)
 
@@ -284,7 +296,8 @@ class Trader:
                             account_id=account_id,
                             figi=position.figi,
                             count_lots=abs(int(position.balance / strategies[position.figi].settings.lot_size)),
-                            is_buy=(position.balance < 0))
+                            is_buy=(position.balance < 0)
+                        )
 
         return result
 

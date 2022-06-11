@@ -43,22 +43,26 @@ class ProgramConfiguration:
 
         # Отдельные настройки для тестирования стратегии в режиме тестирования
         self.__test_strategy_settings = \
-            StrategySettings(name=config["TEST_STRATEGY"]["STRATEGY_NAME"],
-                             figi=config["TEST_STRATEGY"]["FIGI"],
-                             ticker=config["TEST_STRATEGY"]["TICKER"],
-                             max_lots_per_order=int(config["TEST_STRATEGY"]["MAX_LOTS_PER_ORDER"]),
-                             settings=config["TEST_STRATEGY_SETTINGS"])
+            StrategySettings(
+                name=config["TEST_STRATEGY"]["STRATEGY_NAME"],
+                figi=config["TEST_STRATEGY"]["FIGI"],
+                ticker=config["TEST_STRATEGY"]["TICKER"],
+                max_lots_per_order=int(config["TEST_STRATEGY"]["MAX_LOTS_PER_ORDER"]),
+                settings=config["TEST_STRATEGY_SETTINGS"]
+            )
 
         # Динамическое чтение стратегий (1 старатегия - 1 эмитент) для полноценных торгов
         self.__trade_strategy_settings = []
         for strategy_section in config.sections():
             if strategy_section.startswith("STRATEGY_") and not strategy_section.endswith("_SETTINGS"):
                 self.__trade_strategy_settings.append(
-                    StrategySettings(name=config[strategy_section]["STRATEGY_NAME"],
-                                     figi=config[strategy_section]["FIGI"],
-                                     ticker=config[strategy_section]["TICKER"],
-                                     max_lots_per_order=int(config[strategy_section]["MAX_LOTS_PER_ORDER"]),
-                                     settings=config[strategy_section + "_SETTINGS"])
+                    StrategySettings(
+                        name=config[strategy_section]["STRATEGY_NAME"],
+                        figi=config[strategy_section]["FIGI"],
+                        ticker=config[strategy_section]["TICKER"],
+                        max_lots_per_order=int(config[strategy_section]["MAX_LOTS_PER_ORDER"]),
+                        settings=config[strategy_section + "_SETTINGS"]
+                    )
                 )
 
     @property

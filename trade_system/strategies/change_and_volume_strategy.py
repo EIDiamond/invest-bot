@@ -91,7 +91,7 @@ class ChangeAndVolumeStrategy(IStrategy):
         for candle in self.__recent_candles:
             logger.debug(f"Recent Candle to analyze {self.settings.figi} LONG: {candle}")
             open_, high, close, low = quotation_to_decimal(candle.open), quotation_to_decimal(candle.high), \
-                                 quotation_to_decimal(candle.close), quotation_to_decimal(candle.low)
+                                      quotation_to_decimal(candle.close), quotation_to_decimal(candle.low)
 
             if open_ < close \
                     and ((high - close) / (high - low)) <= self.__signal_min_tail \
@@ -116,7 +116,7 @@ class ChangeAndVolumeStrategy(IStrategy):
         for candle in self.__recent_candles:
             logger.debug(f"Recent Candle to analyze {self.settings.figi} SHORT: {candle}")
             open_, high, close, low = quotation_to_decimal(candle.open), quotation_to_decimal(candle.high), \
-                                 quotation_to_decimal(candle.close), quotation_to_decimal(candle.low)
+                                      quotation_to_decimal(candle.close), quotation_to_decimal(candle.low)
 
             if open_ > close \
                     and ((close - low) / (high - low)) <= self.__signal_min_tail \
@@ -132,18 +132,22 @@ class ChangeAndVolumeStrategy(IStrategy):
 
         return False
 
-    def __make_signal(self,
-                      signal_type: SignalType,
-                      profit_multy: Decimal,
-                      stop_multy: Decimal) -> Signal:
+    def __make_signal(
+            self,
+            signal_type: SignalType,
+            profit_multy: Decimal,
+            stop_multy: Decimal
+    ) -> Signal:
         # даем сигнал: take и stop с коэфицентом из конфигурации
         # от цены закрытия свечи (ожидаемо ближайшая цена к текушей на торгах)
         last_candle = self.__recent_candles[len(self.__recent_candles) - 1]
 
-        signal = Signal(figi=self.settings.figi,
-                        signal_type=signal_type,
-                        take_profit_level=quotation_to_decimal(last_candle.close) * profit_multy,
-                        stop_loss_level=quotation_to_decimal(last_candle.close) * stop_multy)
+        signal = Signal(
+            figi=self.settings.figi,
+            signal_type=signal_type,
+            take_profit_level=quotation_to_decimal(last_candle.close) * profit_multy,
+            stop_loss_level=quotation_to_decimal(last_candle.close) * stop_multy
+        )
 
         logger.info(f"Make Signal: {signal}")
 

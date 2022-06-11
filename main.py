@@ -54,13 +54,15 @@ if __name__ == "__main__":
             match config.working_mode:
                 case WorkingMode.HISTORICAL_MODE:
                     # тестируем тестовую стратегию
-                    test_strategy = StrategyFactory.new_factory(config.test_strategy_settings.name,
-                                                                config.test_strategy_settings)
+                    test_strategy = StrategyFactory.new_factory(
+                        config.test_strategy_settings.name,
+                        config.test_strategy_settings
+                    )
 
                     HistoryTestsManager(client_service).start(test_strategy)
 
                 case WorkingMode.SANDBOX_MODE:
-                   pass
+                    pass
 
                 case WorkingMode.TRADE_MODE:
                     # загружем блоггера для написания постов в чат в Telegram
@@ -78,11 +80,12 @@ if __name__ == "__main__":
                         order_service=order_service,
                         stream_service=stream_service,
                         market_data_service=market_data_service,
-                        blogger=blogger).\
-                        start_trading(
-                            config.account_settings,
-                            config.trading_settings,
-                            trade_strategies)
+                        blogger=blogger
+                    ). start_trading(
+                        config.account_settings,
+                        config.trading_settings,
+                        trade_strategies
+                    )
 
                 case _:
                     logger.warning("Working mode is unsupported")

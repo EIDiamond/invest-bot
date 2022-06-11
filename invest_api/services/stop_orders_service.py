@@ -16,17 +16,18 @@ class StopOrderService:
         self.__app_name = app_name
 
     @invest_error_logging
-    def __post_stop_order(self,
-                          account_id: str,
-                          figi: str,
-                          count_lots: int,
-                          price: Quotation,
-                          stop_price: Quotation,
-                          direction: StopOrderDirection,
-                          expiration_type: StopOrderExpirationType,
-                          stop_order_type: StopOrderType,
-                          expire_date: datetime
-                          ) -> str:
+    def __post_stop_order(
+            self,
+            account_id: str,
+            figi: str,
+            count_lots: int,
+            price: Quotation,
+            stop_price: Quotation,
+            direction: StopOrderDirection,
+            expiration_type: StopOrderExpirationType,
+            stop_order_type: StopOrderType,
+            expire_date: datetime
+    ) -> str:
         with Client(self.__token, app_name=self.__app_name) as client:
             logger.debug(f"Post stop order for: {account_id}")
 

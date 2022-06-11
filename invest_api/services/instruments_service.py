@@ -19,9 +19,11 @@ class InstrumentService:
 
     def moex_today_trading_schedule(self) -> (bool, datetime, datetime):
         # информация о торговом дне и расписании торгов на Московский бирже (основная сессия) на сегодня
-        for schedule in self.__trading_schedules(exchange=moex_exchange_name(),
-                                                 _from=datetime.datetime.utcnow(),
-                                                 _to=datetime.datetime.utcnow() + datetime.timedelta(days=1)):
+        for schedule in self.__trading_schedules(
+                exchange=moex_exchange_name(),
+                _from=datetime.datetime.utcnow(),
+                _to=datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        ):
             for day in schedule.days:
                 if day.date.date() == datetime.date.today():
                     logger.info(f"MOEX today schedule: {day}")
@@ -30,19 +32,22 @@ class InstrumentService:
         return False, datetime.datetime.utcnow(), datetime.datetime.utcnow()
 
     @invest_error_logging
-    def __trading_schedules(self,
-                            exchange: str,
-                            _from: datetime,
-                            _to: datetime
-                            ) -> list[TradingSchedule]:
+    def __trading_schedules(
+            self,
+            exchange: str,
+            _from: datetime,
+            _to: datetime
+    ) -> list[TradingSchedule]:
         result = []
 
         with Client(self.__token, app_name=self.__app_name) as client:
             logger.debug(f"Trading Schedules for exchange: {exchange}, from: {_from}, to: {_to}")
 
-            for schedule in client.instruments.trading_schedules(exchange=exchange,
-                                                                 from_=_from,
-                                                                 to=_to).exchanges:
+            for schedule in client.instruments.trading_schedules(
+                    exchange=exchange,
+                    from_=_from,
+                    to=_to
+            ).exchanges:
                 logger.debug(f"{schedule}")
                 result.append(schedule)
 
@@ -53,17 +58,21 @@ class InstrumentService:
         with Client(self.__token, app_name=self.__app_name) as client:
             logger.debug(f"ShareBy figi: {figi}:")
 
-            share = client.instruments.share_by(id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI,
-                                                id=figi).instrument
+            share = client.instruments.share_by(
+                id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_FIGI,
+                id=figi
+            ).instrument
             logger.debug(f"{share}")
 
-            return ShareSettings(ticker=share.ticker,
-                                 lot=share.lot,
-                                 short_enabled_flag=share.short_enabled_flag,
-                                 otc_flag=share.otc_flag,
-                                 buy_available_flag=share.buy_available_flag,
-                                 sell_available_flag=share.sell_available_flag,
-                                 api_trade_available_flag=share.api_trade_available_flag)
+            return ShareSettings(
+                ticker=share.ticker,
+                lot=share.lot,
+                short_enabled_flag=share.short_enabled_flag,
+                otc_flag=share.otc_flag,
+                buy_available_flag=share.buy_available_flag,
+                sell_available_flag=share.sell_available_flag,
+                api_trade_available_flag=share.api_trade_available_flag
+            )
 
     @invest_error_logging
     def __currencies(self) -> None:

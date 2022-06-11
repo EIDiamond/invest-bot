@@ -4,6 +4,7 @@ from tinkoff.invest import InvestError, RequestError, AioRequestError
 
 logger = logging.getLogger(__name__)
 
+
 # дополнительное логирование для ошибок из API
 # в первую очередь tracking_id при RequestError
 def invest_error_logging(func):

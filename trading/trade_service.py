@@ -20,16 +20,17 @@ logger = logging.getLogger(__name__)
 
 
 class TradeService:
-    def __init__(self,
-                 account_service: AccountService,
-                 client_service: ClientService,
-                 instrument_service: InstrumentService,
-                 operation_service: OperationService,
-                 order_service: OrderService,
-                 stream_service: MarketDataStreamService,
-                 market_data_service: MarketDataService,
-                 blogger: Blogger
-                 ) -> None:
+    def __init__(
+            self,
+            account_service: AccountService,
+            client_service: ClientService,
+            instrument_service: InstrumentService,
+            operation_service: OperationService,
+            order_service: OrderService,
+            stream_service: MarketDataStreamService,
+            market_data_service: MarketDataService,
+            blogger: Blogger
+    ) -> None:
         self.__account_service = account_service
         self.__client_service = client_service
         self.__instrument_service = instrument_service
@@ -39,11 +40,12 @@ class TradeService:
         self.__market_data_service = market_data_service
         self.__blogger = blogger
 
-    def start_trading(self,
-                      account_settings: AccountSettings,
-                      trading_settings: TradingSettings,
-                      strategies: list[IStrategy]
-                      ) -> None:
+    def start_trading(
+            self,
+            account_settings: AccountSettings,
+            trading_settings: TradingSettings,
+            strategies: list[IStrategy]
+    ) -> None:
         try:
             logger.info("Finding account for trading")
             account_id = self.__account_service.trading_account_id(account_settings)
@@ -60,12 +62,13 @@ class TradeService:
 
         self.__working_loop(account_id, trading_settings, strategies, account_settings.min_rub_on_account)
 
-    def __working_loop(self,
-                       account_id: str,
-                       trading_settings: TradingSettings,
-                       strategies: list[IStrategy],
-                       min_rub: int
-                       ) -> None:
+    def __working_loop(
+            self,
+            account_id: str,
+            trading_settings: TradingSettings,
+            strategies: list[IStrategy],
+            min_rub: int
+    ) -> None:
         logger.info("Start every day trading")
 
         while True:
@@ -75,7 +78,7 @@ class TradeService:
                 is_trading_day, start_time, end_time = \
                     self.__instrument_service.moex_today_trading_schedule()
                 # загушка для тестов
-                #is_trading_day, start_time, end_time = \
+                # is_trading_day, start_time, end_time = \
                 #    True, \
                 #    datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=10), \
                 #    datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) + datetime.timedelta(minutes=12)
@@ -84,7 +87,9 @@ class TradeService:
                 if is_trading_day and datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) <= end_time:
                     logger.info(f"Today is trading day. Trading will start after {start_time}")
                     # спим до начала торгов плюс немного секунд из конфигурации
-                    TradeService.__sleep_to(start_time + datetime.timedelta(seconds=trading_settings.delay_start_after_open))
+                    TradeService.__sleep_to(
+                        start_time + datetime.timedelta(seconds=trading_settings.delay_start_after_open)
+                    )
 
                     logger.info(f"Trading day has been started")
 

@@ -17,10 +17,11 @@ class MarketDataStreamService:
         self.__app_name = app_name
         self.__market_data_candles_stream: MarketDataStreamManager = None
 
-    def start_candles_stream(self,
-                             figies: list[str],
-                             trade_before_time: datetime
-                             ) -> Generator[Candle, None, None]:
+    def start_candles_stream(
+            self,
+            figies: list[str],
+            trade_before_time: datetime
+    ) -> Generator[Candle, None, None]:
         logger.debug(f"Starting candles stream")
 
         self.__stop_candles_stream()
@@ -31,8 +32,7 @@ class MarketDataStreamService:
             logger.info(f"Subscribe candles: {figies}")
             self.__market_data_candles_stream.candles.subscribe(
                 [
-                    CandleInstrument
-                    (
+                    CandleInstrument(
                         figi=figi,
                         interval=SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
                     )

@@ -18,7 +18,8 @@ class HistoryTestsManager:
 
     def start(self,
               strategy: IStrategy,
-              from_days: int = 7) -> None:
+              from_days: int = 7
+              ) -> None:
         logger.info(f"Start strategy tests: {strategy}")
 
         # Скачивание свечей для тестирования

@@ -15,10 +15,11 @@ class StrategyTester:
     def __init__(self, strategy: IStrategy) -> None:
         self.__strategy = strategy
 
-    def test(self,
-             candles: list[HistoricCandle],
-             portion: int = 1
-             ) -> TestResults:
+    def test(
+            self,
+            candles: list[HistoricCandle],
+            portion: int = 1
+    ) -> TestResults:
         logger.info(f"Start test: {self.__strategy}, portion {portion}, candles count: {len(candles)}")
 
         test_result = TestResults()

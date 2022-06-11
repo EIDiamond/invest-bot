@@ -17,11 +17,12 @@ class ClientService:
         self.__app_name = app_name
 
     @invest_error_logging
-    def download_historic_candle(self,
-                                 figi: str,
-                                 from_days: int,
-                                 interval: CandleInterval
-                                 ) -> list[HistoricCandle]:
+    def download_historic_candle(
+            self,
+            figi: str,
+            from_days: int,
+            interval: CandleInterval
+    ) -> list[HistoricCandle]:
         result: list[HistoricCandle] = []
 
         from_ = now() - timedelta(days=from_days)

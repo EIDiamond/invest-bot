@@ -16,15 +16,16 @@ class OrderService:
         self.__app_name = app_name
 
     @invest_error_logging
-    def __post_order(self,
-                     account_id: str,
-                     figi: str,
-                     count_lots: int,
-                     price: Quotation,
-                     direction: OrderDirection,
-                     order_type: OrderType,
-                     order_id: str
-                     ) -> PostOrderResponse:
+    def __post_order(
+            self,
+            account_id: str,
+            figi: str,
+            count_lots: int,
+            price: Quotation,
+            direction: OrderDirection,
+            order_type: OrderType,
+            order_id: str
+    ) -> PostOrderResponse:
         with Client(self.__token, app_name=self.__app_name) as client:
             return client.orders.post_order(
                 figi=figi,
@@ -33,16 +34,20 @@ class OrderService:
                 direction=direction,
                 account_id=account_id,
                 order_type=order_type,
-                order_id=order_id)
+                order_id=order_id
+            )
 
-    def post_market_order(self,
-                          account_id: str,
-                          figi: str,
-                          count_lots: int,
-                          is_buy: bool
-                          ) -> str:
-        logger.info(f"Post market order account_id: {account_id}, "
-                    f"figi: {figi}, count_lots: {count_lots}, is_buy: {is_buy}")
+    def post_market_order(
+            self,
+            account_id: str,
+            figi: str,
+            count_lots: int,
+            is_buy: bool
+    ) -> str:
+        logger.info(
+            f"Post market order account_id: {account_id}, "
+            f"figi: {figi}, count_lots: {count_lots}, is_buy: {is_buy}"
+        )
 
         order_id = self.__post_order(
             account_id=account_id,
@@ -51,7 +56,8 @@ class OrderService:
             price=None,
             direction=OrderDirection.ORDER_DIRECTION_BUY if is_buy else OrderDirection.ORDER_DIRECTION_SELL,
             order_type=OrderType.ORDER_TYPE_MARKET,
-            order_id=generate_order_id()).order_id
+            order_id=generate_order_id()
+        ).order_id
 
         logger.debug(f"order_id is {order_id}")
 

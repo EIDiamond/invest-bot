@@ -45,13 +45,14 @@ class OperationService:
             return positions
 
     @invest_error_logging
-    def __get_operations(self,
-                         account_id: str,
-                         from_: datetime,
-                         to_: datetime,
-                         state: OperationState,
-                         figi: str = ""
-                         ) -> list[Operation]:
+    def __get_operations(
+            self,
+            account_id: str,
+            from_: datetime,
+            to_: datetime,
+            state: OperationState,
+            figi: str = ""
+    ) -> list[Operation]:
         with Client(self.__token, app_name=self.__app_name) as client:
             logger.debug(f"Get operations for: {account_id}, from: {from_}, to: {to_}, state: {state}, figi: {figi}")
 
