@@ -40,7 +40,8 @@ class TradeResults:
         if not current_trade_order:
             current_trade_order = TradeOrder(
                 open_order_id=open_order_id,
-                signal=signal)
+                signal=signal
+            )
             self.__current_trade_orders[figi] = current_trade_order
 
         return current_trade_order

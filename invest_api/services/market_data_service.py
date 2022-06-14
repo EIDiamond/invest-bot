@@ -1,6 +1,6 @@
 import logging
 
-from tinkoff.invest import Client, GetTradingStatusResponse, SecurityTradingStatus
+from tinkoff.invest import Client, GetTradingStatusResponse, SecurityTradingStatus, Quotation
 
 from invest_api.invest_error_logging import invest_error_logging
 
@@ -40,3 +40,19 @@ class MarketDataService:
                status.market_order_available_flag and \
                status.api_trade_available_flag and \
                status.trading_status == SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING
+
+    def get_last_price(self, figi: str) -> Quotation:
+        """
+        Request last price for instrument by figi.
+        Main reason is for order purposes (more close to current price).
+        """
+        with Client(self.__token, app_name=self.__app_name) as client:
+            prices = client.market_data.get_last_prices(figi=[figi])
+
+            logger.debug(f"Last prices for {figi}: {prices}")
+
+            for price in prices.last_prices:
+                if price.figi == figi:
+                    return price.price
+            else:
+                return None
