@@ -1,7 +1,11 @@
+import asyncio
 import logging
 import os
+import sys
 from logging.handlers import RotatingFileHandler
 
+from blog.blog_worker import BlogWorker
+from blog.blogger import Blogger
 from configuration.configuration import ProgramConfiguration, WorkingMode
 from history_tests.history_manager import HistoryTestsManager
 from invest_api.services.accounts_service import AccountService
@@ -16,6 +20,21 @@ from trading.trade_service import TradeService
 
 # the configuration file name
 CONFIG_FILE = "settings.ini"
+
+
+async def start_asyncio_trading(blog_worker_loop: BlogWorker, trade_service_loop: TradeService) -> None:
+    # Some asyncio MAGIC for Windows OS
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    logger.info("Start loop workers for trading")
+
+    blog_task = asyncio.create_task(blog_worker_loop.worker())
+    trade_task = asyncio.create_task(trade_service_loop.worker())
+
+    await blog_task
+    await trade_task
+
 
 if __name__ == "__main__":
     if not os.path.exists("logs/"):
@@ -57,30 +76,31 @@ if __name__ == "__main__":
 
                     HistoryTestsManager(client_service).start(test_strategy)
 
-                case WorkingMode.SANDBOX_MODE:
-                    pass
-
                 case WorkingMode.TRADE_MODE:
                     logger.info(f"Blog settings: {config.blog_settings}")
 
                     trade_strategies = \
                         [StrategyFactory.new_factory(x.name, x) for x in config.trade_strategy_settings]
 
-                    TradeService(
+                    # Queue to keep messages for TG. TradeService(via Blogger) produce, BlogWorker consume (send)
+                    messages_queue = asyncio.Queue()
+
+                    blog_worker = BlogWorker(config.blog_settings, messages_queue)
+                    trade_service = TradeService(
                         account_service=account_service,
                         client_service=client_service,
                         instrument_service=instrument_service,
                         operation_service=operation_service,
                         order_service=order_service,
                         stream_service=stream_service,
-                        market_data_service=market_data_service
-                    ). start_trading(
-                        config.account_settings,
-                        config.trading_settings,
-                        trade_strategies,
-                        config.blog_settings,
-                        config.trade_strategy_settings
+                        market_data_service=market_data_service,
+                        blogger=Blogger(config.blog_settings, config.trade_strategy_settings, messages_queue),
+                        account_settings=config.account_settings,
+                        trading_settings=config.trading_settings,
+                        strategies=trade_strategies
                     )
+
+                    asyncio.run(start_asyncio_trading(blog_worker, trade_service))
 
                 case _:
                     logger.warning("Working mode is unsupported")

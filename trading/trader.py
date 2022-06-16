@@ -38,7 +38,7 @@ class Trader:
             market_data_service: MarketDataService,
             blogger: Blogger
     ) -> None:
-
+        self.__today_trade_results: TradeResults = None
         self.__client_service = client_service
         self.__instrument_service = instrument_service
         self.__operation_service = operation_service
@@ -47,7 +47,7 @@ class Trader:
         self.__market_data_service = market_data_service
         self.__blogger = blogger
 
-    def trade_day(
+    async def trade_day(
             self,
             account_id: str,
             trading_settings: TradingSettings,
@@ -71,17 +71,16 @@ class Trader:
         logger.info("Start trading today")
         self.__blogger.start_trading_message(today_trade_strategies, rub_before_trade_day)
 
-        today_trade_results: TradeResults = None
         try:
-            today_trade_results = self.__trading(
+            await self.__trading(
                 account_id,
                 trading_settings,
                 today_trade_strategies,
                 trade_day_end_time
             )
             logger.debug("Test Results:")
-            logger.debug(f"Current: {today_trade_results.get_current_open_orders()}")
-            logger.debug(f"Old: {today_trade_results.get_closed_orders()}")
+            logger.debug(f"Current: {self.__today_trade_results.get_current_open_orders()}")
+            logger.debug(f"Old: {self.__today_trade_results.get_closed_orders()}")
         except Exception as ex:
             logger.error(f"Trading error: {repr(ex)}")
 
@@ -89,9 +88,9 @@ class Trader:
         self.__blogger.finish_trading_message()
 
         try:
-            if today_trade_results:
+            if self.__today_trade_results:
                 for key_figi, value_order_id in self.__clear_all_positions(account_id, today_trade_strategies).items():
-                    trade_order = today_trade_results.close_position(key_figi, value_order_id)
+                    trade_order = self.__today_trade_results.close_position(key_figi, value_order_id)
                     self.__blogger.close_position_message(trade_order)
             else:
                 self.__clear_all_positions(account_id, today_trade_strategies)
@@ -100,17 +99,17 @@ class Trader:
 
         logger.info("Show trade results today")
         try:
-            self.__summary_today_trade_results(account_id, today_trade_results, rub_before_trade_day)
+            self.__summary_today_trade_results(account_id, rub_before_trade_day)
         except Exception as ex:
             logger.error(f"Summary trading day error: {repr(ex)}")
 
-    def __trading(
+    async def __trading(
             self,
             account_id: str,
             trading_settings: TradingSettings,
             strategies: dict[str, IStrategy],
             trade_day_end_time: datetime
-    ) -> TradeResults:
+    ) -> None:
         logger.info(f"Subscribe and read Candles for {strategies.keys()}")
 
         # End trading before close trade session
@@ -122,9 +121,9 @@ class Trader:
         logger.debug(f"Stop time: signals - {signals_before_time}, trading - {trade_before_time}")
 
         current_candles: dict[str, Candle] = dict()
-        today_trade_results: TradeResults = TradeResults()
+        self.__today_trade_results = TradeResults()
 
-        for candle in self.__stream_service.start_candles_stream(list(strategies.keys()), trade_before_time):
+        async for candle in self.__stream_service.start_async_candles_stream(list(strategies.keys()), trade_before_time):
             current_figi_candle = current_candles.setdefault(candle.figi, candle)
             if candle.time < current_figi_candle.time:
                 # it can be based on API documentation
@@ -132,7 +131,7 @@ class Trader:
                 continue
 
             # check price from candle for take or stop price levels
-            current_trade_order = today_trade_results.get_current_trade_order(candle.figi)
+            current_trade_order = self.__today_trade_results.get_current_trade_order(candle.figi)
             if current_trade_order:
                 high, low = quotation_to_decimal(candle.high), quotation_to_decimal(candle.low)
 
@@ -144,7 +143,7 @@ class Trader:
                         self.__close_position_by_figi(account_id, [candle.figi], strategies). \
                             get(candle.figi, None)
                     if close_order_id:
-                        trade_order = today_trade_results.close_position(candle.figi, close_order_id)
+                        trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
                         self.__blogger.close_position_message(trade_order)
 
                 elif low <= current_trade_order.signal.take_profit_level <= high:
@@ -153,7 +152,7 @@ class Trader:
                         self.__close_position_by_figi(account_id, [candle.figi], strategies). \
                             get(candle.figi, None)
                     if close_order_id:
-                        trade_order = today_trade_results.close_position(candle.figi, close_order_id)
+                        trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
                         self.__blogger.close_position_message(trade_order)
 
             if candle.time > current_figi_candle.time and \
@@ -165,7 +164,7 @@ class Trader:
                 if signal_new:
                     logger.info(f"New signal: {signal_new}")
 
-                    if today_trade_results.get_current_trade_order(candle.figi):
+                    if self.__today_trade_results.get_current_trade_order(candle.figi):
                         logger.info(f"New signal has been skipped. Previous signal is still alive.")
                     elif not self.__market_data_service.is_stock_ready_for_trading(candle.figi):
                         logger.info(f"New signal has been skipped. Stock isn't ready for trading")
@@ -185,7 +184,11 @@ class Trader:
                                 count_lots=available_lots,
                                 is_buy=(signal_new.signal_type == SignalType.LONG)
                             )
-                            open_position = today_trade_results.open_position(candle.figi, open_order_id, signal_new)
+                            open_position = self.__today_trade_results.open_position(
+                                candle.figi,
+                                open_order_id,
+                                signal_new
+                            )
                             self.__blogger.open_position_message(open_position)
                             logger.info(f"Open position: {open_position}")
                         else:
@@ -195,12 +198,9 @@ class Trader:
 
         logger.info("Today trading has been completed")
 
-        return today_trade_results
-
     def __summary_today_trade_results(
             self,
             account_id: str,
-            today_trade_results: TradeResults,
             rub_before_trade_day: Decimal
     ) -> None:
         logger.info("Today trading summary:")
@@ -214,9 +214,9 @@ class Trader:
         logger.info(f"Today Profit:{today_profit} rub ({today_percent_profit} %)")
         self.__blogger.trading_depo_summary_message(rub_before_trade_day, current_rub_on_depo)
 
-        if today_trade_results:
+        if self.__today_trade_results:
             logger.info(f"Today Open Signals:")
-            for figi_key, trade_order_value in today_trade_results.get_current_open_orders().items():
+            for figi_key, trade_order_value in self.__today_trade_results.get_current_open_orders().items():
                 logger.info(f"Stock: {figi_key}")
 
                 open_order_state = self.__order_service.get_order_state(account_id, trade_order_value.open_order_id)
@@ -227,7 +227,7 @@ class Trader:
             logger.info(f"All open positions should be closed manually.")
 
             logger.info(f"Today Closed Signals:")
-            for figi_key, trade_orders_value in today_trade_results.get_closed_orders().items():
+            for figi_key, trade_orders_value in self.__today_trade_results.get_closed_orders().items():
                 logger.info(f"Stock: {figi_key}")
                 for trade_order in trade_orders_value:
                     open_order_state = self.__order_service.get_order_state(account_id, trade_order.open_order_id)

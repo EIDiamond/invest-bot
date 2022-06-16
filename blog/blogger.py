@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from decimal import Decimal
 
@@ -5,7 +6,6 @@ from tinkoff.invest import OrderState
 
 from configuration.settings import BlogSettings, StrategySettings
 from invest_api.utils import moneyvalue_to_decimal
-from tg_api.telegram_service import TelegramService
 from trade_system.signal import SignalType
 from trade_system.strategies.base_strategy import IStrategy
 from trading.trade_results import TradeOrder
@@ -22,32 +22,20 @@ class Blogger:
     def __init__(
             self,
             blog_settings: BlogSettings,
-            trade_strategies: list[StrategySettings]
+            trade_strategies: list[StrategySettings],
+            messages_queue: asyncio.Queue
     ) -> None:
         self.__blog_status = blog_settings.blog_status
         self.__trade_strategies: dict[str, StrategySettings] = {x.figi: x for x in trade_strategies}
-
-        self.__init_tg(blog_settings.bot_token, blog_settings.chat_id)
-
-    def __init_tg(self, token: str, chat_id: str) -> None:
-        try:
-            self.__telegram_service = TelegramService(
-                token=token,
-                chat_id=chat_id
-            )
-        except Exception as ex:
-            logger.error(f"Error init tg service {repr(ex)}")
-            # Any errors with TG aren't important. Continue trading is important.
-            self.__blog_status = False
+        self.__messages_queue = messages_queue
 
     def __send_text_message(self, text: str) -> None:
         try:
-            logger.debug(f"Message to telegram: {text}")
+            logger.debug(f"Put message to telegram messages queue: {text}")
 
-            self.__telegram_service.send_text_message(text)
+            self.__messages_queue.put_nowait(text)
         except Exception as ex:
-            logger.error(f"Error send message to telegram {repr(ex)}")
-            # Any errors with TG aren't important. Continue trading is important.
+            logger.error(f"Error put message to telegram messages queue: {repr(ex)}")
 
     def start_trading_message(
             self,
@@ -106,7 +94,6 @@ class Blogger:
         """
         if self.__blog_status:
             self.__send_text_message(
-                f"Trading day summary: "
                 f"Start depo: {rub_before_trade_day:.2f} close depo:{current_rub_on_depo:.2f}."
             )
 
@@ -136,7 +123,7 @@ class Blogger:
         The method sends just goodbye title.
         """
         if self.__blog_status:
-            self.__send_text_message(f"Trading has been completed. See you next trade day!")
+            self.__send_text_message(f"Trading has been completed. See you on next trade day!")
 
     def summary_open_signal_message(self, trade_order: TradeOrder, open_order_state: OrderState):
         """

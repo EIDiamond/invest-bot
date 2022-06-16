@@ -20,10 +20,10 @@ Note: trade strategy is represented in code is just example and not a trade or i
 ```
 $ pip install tinkoff-investments
 ```
-- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot)
+- [aiogram](https://docs.aiogram.dev/en/latest/)
 <!-- termynal -->
 ```
-$ pip install python-telegram-bot --upgrade
+$ pip install -U aiogram
 ```
 ### Brokerage account
 Open brokerage account [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) and top up your account.
@@ -95,7 +95,7 @@ Test strategy on historical candles (1 min interval) for last 7 days:
 - In the end, test results with summary will be written in log file
 - You can analyze it and make a decision about next steps
 
-## Trading on stock exchange mode
+## Trading on stocks exchange mode
 Before start:
 - Token verification
 - Appropriate account selects automatically by token
