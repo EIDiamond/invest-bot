@@ -28,6 +28,7 @@ class Trader:
     """
     The class encapsulate main trade logic.
     """
+
     def __init__(
             self,
             client_service: ClientService,
@@ -123,7 +124,10 @@ class Trader:
         current_candles: dict[str, Candle] = dict()
         self.__today_trade_results = TradeResults()
 
-        async for candle in self.__stream_service.start_async_candles_stream(list(strategies.keys()), trade_before_time):
+        async for candle in self.__stream_service.start_async_candles_stream(
+                list(strategies.keys()),
+                trade_before_time
+        ):
             current_figi_candle = current_candles.setdefault(candle.figi, candle)
             if candle.time < current_figi_candle.time:
                 # it can be based on API documentation
@@ -140,8 +144,7 @@ class Trader:
                 if low <= current_trade_order.signal.stop_loss_level <= high:
                     logger.info(f"STOP LOSS: {current_trade_order}")
                     close_order_id = \
-                        self.__close_position_by_figi(account_id, [candle.figi], strategies). \
-                            get(candle.figi, None)
+                        self.__close_position_by_figi(account_id, [candle.figi], strategies).get(candle.figi, None)
                     if close_order_id:
                         trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
                         self.__blogger.close_position_message(trade_order)
@@ -149,8 +152,7 @@ class Trader:
                 elif low <= current_trade_order.signal.take_profit_level <= high:
                     logger.info(f"TAKE PROFIT: {current_trade_order}")
                     close_order_id = \
-                        self.__close_position_by_figi(account_id, [candle.figi], strategies). \
-                            get(candle.figi, None)
+                        self.__close_position_by_figi(account_id, [candle.figi], strategies).get(candle.figi, None)
                     if close_order_id:
                         trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
                         self.__blogger.close_position_message(trade_order)
