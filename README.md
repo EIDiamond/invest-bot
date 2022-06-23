@@ -138,5 +138,5 @@ Any kind of settings can be changed in main.py code
 ## Project change log
 [Here](CHANGELOG.md)
 
-## Disclamer
+## Disclaimer
 The author is not responsible for any errors or omissions, or for the trade results obtained from the use of this bot. 
