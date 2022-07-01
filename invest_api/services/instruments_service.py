@@ -4,7 +4,7 @@ import logging
 from tinkoff.invest import Client, TradingSchedule, InstrumentIdType, InstrumentStatus
 
 from configuration.settings import ShareSettings
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 from invest_api.utils import moex_exchange_name
 
 __all__ = ("InstrumentService")

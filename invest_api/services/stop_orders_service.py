@@ -3,7 +3,7 @@ import logging
 
 from tinkoff.invest import Client, Quotation, StopOrderDirection, StopOrderExpirationType, StopOrderType, StopOrder
 
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 
 __all__ = ("StopOrderService")
 

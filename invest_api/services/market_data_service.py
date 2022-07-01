@@ -2,7 +2,7 @@ import logging
 
 from tinkoff.invest import Client, GetTradingStatusResponse, SecurityTradingStatus, Quotation
 
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 
 __all__ = ("MarketDataService")
 

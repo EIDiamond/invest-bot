@@ -4,7 +4,7 @@ from datetime import timedelta
 from tinkoff.invest import CandleInterval, Client, HistoricCandle
 from tinkoff.invest.utils import now
 
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 
 __all__ = ("ClientService")
 

@@ -3,7 +3,7 @@ import logging
 from tinkoff.invest import Client, AccessLevel, AccountType, AccountStatus
 
 from configuration.settings import AccountSettings
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 
 __all__ = ("AccountService")
 

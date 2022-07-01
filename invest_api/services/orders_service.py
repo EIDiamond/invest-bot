@@ -3,7 +3,7 @@ import logging
 from tinkoff.invest import Client, OrderDirection, Quotation, OrderType, PostOrderResponse, OrderState
 
 from invest_api.utils import generate_order_id
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 
 __all__ = ("OrderService")
 

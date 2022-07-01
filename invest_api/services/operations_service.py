@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from tinkoff.invest import Client, PositionsResponse, PositionsSecurities, OperationState, Operation, PortfolioResponse
 
-from invest_api.invest_error_logging import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging
 from invest_api.utils import moneyvalue_to_decimal, rub_currency_name
 
 __all__ = ("OperationService")
