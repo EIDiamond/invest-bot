@@ -3,7 +3,7 @@ import logging
 from tinkoff.invest import Client, AccessLevel, AccountType, AccountStatus
 
 from configuration.settings import AccountSettings
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
 __all__ = ("AccountService")
 
@@ -18,6 +18,7 @@ class AccountService:
         self.__token = token
         self.__app_name = app_name
 
+    @invest_api_retry()
     @invest_error_logging
     def trading_account_id(self, account_settings: AccountSettings) -> str:
         """
@@ -53,6 +54,7 @@ class AccountService:
 
         return result
 
+    @invest_api_retry()
     @invest_error_logging
     def __verify(self) -> bool:
         """

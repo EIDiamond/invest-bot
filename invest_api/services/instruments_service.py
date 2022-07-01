@@ -4,7 +4,7 @@ import logging
 from tinkoff.invest import Client, TradingSchedule, InstrumentIdType, InstrumentStatus
 
 from configuration.settings import ShareSettings
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 from invest_api.utils import moex_exchange_name
 
 __all__ = ("InstrumentService")
@@ -37,6 +37,7 @@ class InstrumentService:
 
         return False, datetime.datetime.utcnow(), datetime.datetime.utcnow()
 
+    @invest_api_retry()
     @invest_error_logging
     def __trading_schedules(
             self,
@@ -59,6 +60,7 @@ class InstrumentService:
 
         return result
 
+    @invest_api_retry()
     @invest_error_logging
     def share_by_figi(self, figi: str) -> ShareSettings:
         """
@@ -83,6 +85,7 @@ class InstrumentService:
                 api_trade_available_flag=share.api_trade_available_flag
             )
 
+    @invest_api_retry()
     @invest_error_logging
     def __currencies(self) -> None:
         with Client(self.__token, app_name=self.__app_name) as client:
@@ -91,6 +94,7 @@ class InstrumentService:
             ).instruments:
                 logger.debug(f"{cur}")
 
+    @invest_api_retry()
     @invest_error_logging
     def __instrument_by_figi(self, figi: str) -> None:
         with Client(self.__token, app_name=self.__app_name) as client:

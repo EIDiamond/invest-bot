@@ -3,7 +3,7 @@ import logging
 
 from tinkoff.invest import Client, Quotation, StopOrderDirection, StopOrderExpirationType, StopOrderType, StopOrder
 
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
 __all__ = ("StopOrderService")
 
@@ -18,6 +18,7 @@ class StopOrderService:
         self.__token = token
         self.__app_name = app_name
 
+    @invest_api_retry()
     @invest_error_logging
     def __post_stop_order(
             self,
@@ -46,11 +47,13 @@ class StopOrderService:
                 expire_date=expire_date
             ).stop_order_id
 
+    @invest_api_retry()
     @invest_error_logging
     def get_stop_orders(self, account_id: str) -> list[StopOrder]:
         with Client(self.__token, app_name=self.__app_name) as client:
             return client.stop_orders.get_stop_orders(account_id=account_id).stop_orders
 
+    @invest_api_retry()
     @invest_error_logging
     def cancel_stop_order(self, account_id: str, stop_order_id: str) -> None:
         with Client(self.__token, app_name=self.__app_name) as client:

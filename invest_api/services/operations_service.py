@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from tinkoff.invest import Client, PositionsResponse, PositionsSecurities, OperationState, Operation, PortfolioResponse
 
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 from invest_api.utils import moneyvalue_to_decimal, rub_currency_name
 
 __all__ = ("OperationService")
@@ -42,6 +42,7 @@ class OperationService:
 
         return positions.securities if positions else None
 
+    @invest_api_retry()
     @invest_error_logging
     def __get_positions(self, account_id: str) -> PositionsResponse:
         with Client(self.__token, app_name=self.__app_name) as client:
@@ -53,6 +54,7 @@ class OperationService:
 
             return positions
 
+    @invest_api_retry()
     @invest_error_logging
     def __get_operations(
             self,
@@ -77,6 +79,7 @@ class OperationService:
 
             return operations
 
+    @invest_api_retry()
     @invest_error_logging
     def __get_portfolio(self, account_id: str) -> PortfolioResponse:
         with Client(self.__token, app_name=self.__app_name) as client:

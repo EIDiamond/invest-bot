@@ -2,7 +2,7 @@ import logging
 
 from tinkoff.invest import Client, GetTradingStatusResponse, SecurityTradingStatus, Quotation
 
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
 __all__ = ("MarketDataService")
 
@@ -17,6 +17,7 @@ class MarketDataService:
         self.__token = token
         self.__app_name = app_name
 
+    @invest_api_retry()
     @invest_error_logging
     def __get_trading_status(self, figi: str) -> GetTradingStatusResponse:
         with Client(self.__token, app_name=self.__app_name) as client:

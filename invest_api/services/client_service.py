@@ -4,7 +4,7 @@ from datetime import timedelta
 from tinkoff.invest import CandleInterval, Client, HistoricCandle
 from tinkoff.invest.utils import now
 
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
 __all__ = ("ClientService")
 
@@ -19,6 +19,7 @@ class ClientService:
         self.__token = token
         self.__app_name = app_name
 
+    @invest_api_retry()
     @invest_error_logging
     def download_historic_candle(
             self,
@@ -46,6 +47,7 @@ class ClientService:
 
         return result
 
+    @invest_api_retry()
     @invest_error_logging
     def cancel_all_orders(self, account_id: str) -> None:
         """ Cancel all open orders. """
