@@ -14,15 +14,15 @@ def invest_error_logging(func):
             tracking_id = ex.metadata.tracking_id if ex.metadata else ""
             logger.error("RequestError tracking_id=%s code=%s repr=%s details=%s",
                          tracking_id, str(ex.code), repr(ex), ex.details)
-            raise ex
+            raise
         except AioRequestError as ex:
             # tracking_id = ex.metadata.tracking_id if ex.metadata else ""
             logger.error("AioRequestError code=%s repr=%s details=%s",
                          str(ex.code), repr(ex), ex.details)
-            raise ex
+            raise 
         except InvestError as ex:
             logger.error("InvestError repr=%s", repr(ex))
-            raise ex
+            raise
 
     return log_wrapper
 
