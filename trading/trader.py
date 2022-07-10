@@ -13,7 +13,6 @@ from invest_api.services.operations_service import OperationService
 from invest_api.services.orders_service import OrderService
 from invest_api.services.market_data_stream_service import MarketDataStreamService
 from invest_api.utils import candle_to_historiccandle
-
 from trade_system.signal import SignalType
 from trade_system.strategies.base_strategy import IStrategy
 from trading.trade_results import TradeResults
