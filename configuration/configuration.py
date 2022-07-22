@@ -1,19 +1,8 @@
-import enum
 from configparser import ConfigParser
 
 from configuration.settings import StrategySettings, AccountSettings, TradingSettings, BlogSettings
 
-__all__ = ("ProgramConfiguration", "WorkingMode")
-
-
-@enum.unique
-class WorkingMode(enum.IntEnum):
-    """
-    Bot working modes
-    """
-    HISTORICAL_MODE = 0  # 0 - test on historical candles mode
-    SANDBOX_MODE = 1  # 1 - reserved
-    TRADE_MODE = 2  # 2 - real trading mode
+__all__ = ("ProgramConfiguration")
 
 
 class ProgramConfiguration:
@@ -24,8 +13,6 @@ class ProgramConfiguration:
         # classic ini file
         config = ConfigParser()
         config.read(file_name)
-
-        self.__working_mode = WorkingMode(int(config["GENERAL"]["MODE"]))
 
         self.__tinkoff_token = config["INVEST_API"]["TOKEN"]
         self.__tinkoff_app_name = config["INVEST_API"]["APP_NAME"]
@@ -47,16 +34,6 @@ class ProgramConfiguration:
             stop_signals_before_close=int(config["TRADING_SETTINGS"]["STOP_SIGNALS_BEFORE_EXCHANGE_CLOSE_MINUTES"])
         )
 
-        # Here is separate section for test purposes
-        self.__test_strategy_settings = \
-            StrategySettings(
-                name=config["TEST_STRATEGY"]["STRATEGY_NAME"],
-                figi=config["TEST_STRATEGY"]["FIGI"],
-                ticker=config["TEST_STRATEGY"]["TICKER"],
-                max_lots_per_order=int(config["TEST_STRATEGY"]["MAX_LOTS_PER_ORDER"]),
-                settings=config["TEST_STRATEGY_SETTINGS"]
-            )
-
         self.__trade_strategy_settings = []
         for strategy_section in config.sections():
             if strategy_section.startswith("STRATEGY_") and not strategy_section.endswith("_SETTINGS"):
@@ -69,10 +46,6 @@ class ProgramConfiguration:
                         settings=config[strategy_section + "_SETTINGS"]
                     )
                 )
-
-    @property
-    def working_mode(self) -> WorkingMode:
-        return self.__working_mode
 
     @property
     def tinkoff_token(self) -> str:
@@ -89,10 +62,6 @@ class ProgramConfiguration:
     @property
     def account_settings(self) -> AccountSettings:
         return self.__account_settings
-
-    @property
-    def test_strategy_settings(self) -> StrategySettings:
-        return self.__test_strategy_settings
 
     @property
     def trade_strategy_settings(self) -> list[StrategySettings]:

@@ -8,7 +8,6 @@ The bot is using [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/
 - Trading RUB stocks via [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) on MOEX Exchange 
 - Ability to use personal trade strategy for every stock
 - Trade information sends to a telegram chat (orders details, trade day summary etc.)
-- Ability to test trade strategy on historical data 
 
 Note: trade strategy is represented in code is just example and not a trade or invest recommendation.     
 
@@ -50,11 +49,6 @@ Run main.py
 
 ## Configuration
 Configuration can be specified via settings.ini file.
-### Section GENERAL
-- mode - bot working mode: 
-  - 0 - testing on historical data
-  - 1 - reserved
-  - 2 - trading on stock exchange
 ### Section INVEST_API
 Token and app name for [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) api.
 ### Section BLOG
@@ -82,20 +76,7 @@ Detailed settings for strategy. Strategy class reads and parses settings manuall
 
 Note: Only one strategy for one stock in configuration.
 
-Section TEST_STRATEGY and TEST_STRATEGY_SETTINGS
-
-Detailed settings for test strategy on historical candles.     
-
-## Test strategy mode
-
-Test strategy on historical candles (1 min interval) for last 7 days: 
-- Strategy class analyses candles and returns signal (long or short) if needed  
-- If signal exists, historical candles use last price to check take profit or stop loss price levels
-- If stop or take price levels are confirmed, strategy will start find signals again
-- In the end, test results with summary will be written in log file
-- You can analyze it and make a decision about next steps
-
-## Trading on stocks exchange mode
+## Trading on stocks exchange
 Before start:
 - Token verification
 - Appropriate account selects automatically by token
