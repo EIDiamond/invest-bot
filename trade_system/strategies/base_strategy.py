@@ -1,5 +1,6 @@
 import abc
 import logging
+from typing import Optional
 
 from tinkoff.invest import HistoricCandle
 
@@ -18,7 +19,7 @@ class IStrategy(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def analyze_candles(self, candles: list[HistoricCandle]) -> Signal:
+    def analyze_candles(self, candles: list[HistoricCandle]) -> Optional[Signal]:
         pass
 
     @abc.abstractmethod

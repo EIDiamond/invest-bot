@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal
+from typing import Optional
 
 from tinkoff.invest import HistoricCandle
 from tinkoff.invest.utils import quotation_to_decimal
@@ -53,7 +54,7 @@ class ChangeAndVolumeStrategy(IStrategy):
     def update_short_status(self, status: bool) -> None:
         self.__settings.short_enabled_flag = status
 
-    def analyze_candles(self, candles: list[HistoricCandle]) -> Signal:
+    def analyze_candles(self, candles: list[HistoricCandle]) -> Optional[Signal]:
         """
         The method analyzes candles and returns his decision.
         """

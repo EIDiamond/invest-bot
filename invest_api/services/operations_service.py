@@ -1,6 +1,7 @@
 import datetime
 import logging
 from decimal import Decimal
+from typing import Optional
 
 from tinkoff.invest import Client, PositionsResponse, PositionsSecurities, OperationState, Operation, PortfolioResponse
 
@@ -20,7 +21,7 @@ class OperationService:
         self.__token = token
         self.__app_name = app_name
 
-    def available_rub_on_account(self, account_id: str) -> Decimal:
+    def available_rub_on_account(self, account_id: str) -> Optional[Decimal]:
         """
         Return available amount of rub on account
         """

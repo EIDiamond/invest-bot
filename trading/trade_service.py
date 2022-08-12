@@ -132,4 +132,3 @@ class TradeService:
 
         if total_seconds > 0:
             await asyncio.sleep(total_seconds)
-

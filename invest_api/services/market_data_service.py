@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 from tinkoff.invest import Client, GetTradingStatusResponse, SecurityTradingStatus, Quotation
 
@@ -42,7 +43,7 @@ class MarketDataService:
                status.api_trade_available_flag and \
                status.trading_status == SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING
 
-    def get_last_price(self, figi: str) -> Quotation:
+    def get_last_price(self, figi: str) -> Optional[Quotation]:
         """
         Request last price for instrument by figi.
         Main reason is for order purposes (more close to current price).
