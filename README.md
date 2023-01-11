@@ -1,5 +1,9 @@
 # Trading bot based on Tinkoff Invest Python gRPC client API
 
+## Project Status
+The project status is an example of trading bot and isn't ready for any production using. 
+
+
 ## Description
 Here is trading bot for MOEX Exchange with ability to send information about trading to a telegram chat.
 The bot is using [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python) api.
