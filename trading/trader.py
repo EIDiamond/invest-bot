@@ -129,7 +129,7 @@ class Trader:
         ):
             current_figi_candle = current_candles.setdefault(candle.figi, candle)
             if candle.time < current_figi_candle.time:
-                # it can be based on API documentation
+                # it happens (based on API documentation)
                 logger.debug("Skip candle from past.")
                 continue
 
