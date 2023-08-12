@@ -1,6 +1,7 @@
 import uuid
 from decimal import Decimal
 
+from grpc import StatusCode
 from tinkoff.invest import MoneyValue, Quotation, Candle, HistoricCandle
 from tinkoff.invest.utils import quotation_to_decimal, decimal_to_quotation
 
@@ -47,3 +48,9 @@ def candle_to_historiccandle(candle: Candle) -> HistoricCandle:
         time=candle.time,
         is_complete=True
     )
+
+
+def invest_api_retry_status_codes() -> set[StatusCode]:
+    return {StatusCode.CANCELLED, StatusCode.DEADLINE_EXCEEDED, StatusCode.RESOURCE_EXHAUSTED,
+            StatusCode.FAILED_PRECONDITION, StatusCode.ABORTED, StatusCode.INTERNAL,
+            StatusCode.UNAVAILABLE, StatusCode.DATA_LOSS}
