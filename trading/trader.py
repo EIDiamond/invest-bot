@@ -140,21 +140,24 @@ class Trader:
 
                 # Logic is:
                 # if stop or take price level is between high and low, then stop or take will be executed
-                if low <= current_trade_order.signal.stop_loss_level <= high:
-                    logger.info(f"STOP LOSS: {current_trade_order}")
-                    close_order_id = \
-                        self.__close_position_by_figi(account_id, [candle.figi], strategies).get(candle.figi, None)
-                    if close_order_id:
-                        trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
-                        self.__blogger.close_position_message(trade_order)
+                try:
+                    if low <= current_trade_order.signal.stop_loss_level <= high:
+                        logger.info(f"STOP LOSS: {current_trade_order}")
+                        close_order_id = \
+                            self.__close_position_by_figi(account_id, [candle.figi], strategies).get(candle.figi, None)
+                        if close_order_id:
+                            trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
+                            self.__blogger.close_position_message(trade_order)
 
-                elif low <= current_trade_order.signal.take_profit_level <= high:
-                    logger.info(f"TAKE PROFIT: {current_trade_order}")
-                    close_order_id = \
-                        self.__close_position_by_figi(account_id, [candle.figi], strategies).get(candle.figi, None)
-                    if close_order_id:
-                        trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
-                        self.__blogger.close_position_message(trade_order)
+                    elif low <= current_trade_order.signal.take_profit_level <= high:
+                        logger.info(f"TAKE PROFIT: {current_trade_order}")
+                        close_order_id = \
+                            self.__close_position_by_figi(account_id, [candle.figi], strategies).get(candle.figi, None)
+                        if close_order_id:
+                            trade_order = self.__today_trade_results.close_position(candle.figi, close_order_id)
+                            self.__blogger.close_position_message(trade_order)
+                except Exception as ex:
+                    logger.error(f"Error check Stop loss and Take profit levels: {repr(ex)}")
 
             if candle.time > current_figi_candle.time and \
                     datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) <= signals_before_time:
@@ -165,35 +168,38 @@ class Trader:
                 if signal_new:
                     logger.info(f"New signal: {signal_new}")
 
-                    if self.__today_trade_results.get_current_trade_order(candle.figi):
-                        logger.info(f"New signal has been skipped. Previous signal is still alive.")
-                    elif not self.__market_data_service.is_stock_ready_for_trading(candle.figi):
-                        logger.info(f"New signal has been skipped. Stock isn't ready for trading")
-                    else:
-                        available_lots = self.__open_position_lots_count(
-                            account_id,
-                            strategies[candle.figi].settings.max_lots_per_order,
-                            quotation_to_decimal(candle.close),
-                            strategies[candle.figi].settings.lot_size
-                        )
-
-                        logger.debug(f"Available lots: {available_lots}")
-                        if available_lots:
-                            open_order_id = self.__order_service.post_market_order(
-                                account_id=account_id,
-                                figi=candle.figi,
-                                count_lots=available_lots,
-                                is_buy=(signal_new.signal_type == SignalType.LONG)
-                            )
-                            open_position = self.__today_trade_results.open_position(
-                                candle.figi,
-                                open_order_id,
-                                signal_new
-                            )
-                            self.__blogger.open_position_message(open_position)
-                            logger.info(f"Open position: {open_position}")
+                    try:
+                        if self.__today_trade_results.get_current_trade_order(candle.figi):
+                            logger.info(f"New signal has been skipped. Previous signal is still alive.")
+                        elif not self.__market_data_service.is_stock_ready_for_trading(candle.figi):
+                            logger.info(f"New signal has been skipped. Stock isn't ready for trading")
                         else:
-                            logger.info(f"New signal has been skipped. No available money")
+                            available_lots = self.__open_position_lots_count(
+                                account_id,
+                                strategies[candle.figi].settings.max_lots_per_order,
+                                quotation_to_decimal(candle.close),
+                                strategies[candle.figi].settings.lot_size
+                            )
+
+                            logger.debug(f"Available lots: {available_lots}")
+                            if available_lots:
+                                open_order_id = self.__order_service.post_market_order(
+                                    account_id=account_id,
+                                    figi=candle.figi,
+                                    count_lots=available_lots,
+                                    is_buy=(signal_new.signal_type == SignalType.LONG)
+                                )
+                                open_position = self.__today_trade_results.open_position(
+                                    candle.figi,
+                                    open_order_id,
+                                    signal_new
+                                )
+                                self.__blogger.open_position_message(open_position)
+                                logger.info(f"Open position: {open_position}")
+                            else:
+                                logger.info(f"New signal has been skipped. No available money")
+                    except Exception as ex:
+                        logger.error(f"Error open new position by new signal: {repr(ex)}")
 
             current_candles[candle.figi] = candle
 
