@@ -30,7 +30,7 @@ def invest_error_logging(func):
 
 
 # Decorator retries api requests for some kind of exceptions
-def invest_api_retry(retry_count: int = 3, exceptions: tuple = ( RequestError )):
+def invest_api_retry(retry_count: int = 5, exceptions: tuple = ( RequestError )):
     def errors_retry(func):
 
         def errors_wrapper(*args, **kwargs):
