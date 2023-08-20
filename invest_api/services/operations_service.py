@@ -4,8 +4,10 @@ from decimal import Decimal
 from typing import Optional
 
 from tinkoff.invest import Client, PositionsResponse, PositionsSecurities, OperationState, Operation, PortfolioResponse
+from tinkoff.invest.utils import quotation_to_decimal
 
 from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
+from invest_api.services.market_data_service import MarketDataService
 from invest_api.utils import moneyvalue_to_decimal, rub_currency_name
 
 __all__ = ("OperationService")
@@ -25,15 +27,23 @@ class OperationService:
         """
         Return available amount of rub on account
         """
+        total_money = 0
+        market_data_service = MarketDataService(self.__token, self.__app_name)
         position = self.__get_positions(account_id)
 
         if position:
             for money in position.money:
                 if money.currency == rub_currency_name():
                     logger.debug(f"Amount of RUB on account: {money}")
-                    return moneyvalue_to_decimal(money)
+                    total_money = moneyvalue_to_decimal(money)
 
-        return None
+            for security in position.securities:
+                if security.blocked == 0 and security.balance < 0:
+                    last_price = market_data_service.get_last_price(security.figi)
+                    if last_price:
+                        total_money += quotation_to_decimal(last_price) * security.balance * 2
+
+        return total_money
 
     def positions_securities(self, account_id: str) -> list[PositionsSecurities]:
         """
