@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2023-08-20
+### Fixed
+- Calculation available money on account was changed. Now, calculation method consider short positions.
+- A few stability changes
+
+
 ## 2023-08-12
 ### Fixed
 - Market stream reconnect was added due feedback and the following comment in the python SDK [Issue](https://github.com/Tinkoff/invest-python/issues/210#issuecomment-1482780561)
