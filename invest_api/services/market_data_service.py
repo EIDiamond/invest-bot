@@ -43,6 +43,8 @@ class MarketDataService:
                status.api_trade_available_flag and \
                status.trading_status == SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING
 
+    @invest_api_retry()
+    @invest_error_logging
     def get_last_price(self, figi: str) -> Optional[Quotation]:
         """
         Request last price for instrument by figi.
