@@ -2,7 +2,7 @@ import datetime
 import logging
 from decimal import Decimal
 
-from tinkoff.invest import Candle
+from tinkoff.invest import Candle, OrderExecutionReportStatus
 from tinkoff.invest.utils import quotation_to_decimal
 
 from blog.blogger import Blogger
@@ -183,19 +183,23 @@ class Trader:
 
                             logger.debug(f"Available lots: {available_lots}")
                             if available_lots:
-                                open_order_id = self.__order_service.post_market_order(
+                                open_order = self.__order_service.post_market_order(
                                     account_id=account_id,
                                     figi=candle.figi,
                                     count_lots=available_lots,
                                     is_buy=(signal_new.signal_type == SignalType.LONG)
                                 )
-                                open_position = self.__today_trade_results.open_position(
-                                    candle.figi,
-                                    open_order_id,
-                                    signal_new
-                                )
-                                self.__blogger.open_position_message(open_position)
-                                logger.info(f"Open position: {open_position}")
+                                if open_order.execution_report_status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_FILL or \
+                                        open_order.execution_report_status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_PARTIALLYFILL:
+                                    open_position = self.__today_trade_results.open_position(
+                                        candle.figi,
+                                        open_order.order_id,
+                                        signal_new
+                                    )
+                                    self.__blogger.open_position_message(open_position)
+                                    logger.info(f"Open position: {open_position}")
+                                else:
+                                    logger.info(f"Open order status failed: {open_order}")
                             else:
                                 logger.info(f"New signal has been skipped. No available money")
                     except Exception as ex:
@@ -294,13 +298,17 @@ class Trader:
                 if position.figi in figies:
                     # Check a stock
                     if self.__market_data_service.is_stock_ready_for_trading(position.figi):
-                        result[position.figi] = self.__order_service.post_market_order(
+                        close_order = self.__order_service.post_market_order(
                             account_id=account_id,
                             figi=position.figi,
                             count_lots=abs(int(position.balance / strategies[position.figi].settings.lot_size)),
                             is_buy=(position.balance < 0)
                         )
-
+                        if close_order.execution_report_status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_FILL or \
+                                close_order.execution_report_status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_PARTIALLYFILL:
+                            result[position.figi] = close_order.order_id
+                        else:
+                            logger.info(f"Close order status failed: {close_order}")
         return result
 
     def __get_today_strategies(self, strategies: list[IStrategy]) -> dict[str, IStrategy]:
