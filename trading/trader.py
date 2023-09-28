@@ -182,7 +182,7 @@ class Trader:
                             )
 
                             logger.debug(f"Available lots: {available_lots}")
-                            if available_lots:
+                            if available_lots > 0:
                                 open_order = self.__order_service.post_market_order(
                                     account_id=account_id,
                                     figi=candle.figi,
