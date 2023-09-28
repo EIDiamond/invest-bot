@@ -2,6 +2,7 @@
 
 ## Project Status
 The project status is an example of trading bot and isn't ready for any production using. 
+The provided trade strategy is just an example and have negative profit by the end.
 
 
 ## Description
