@@ -30,7 +30,8 @@ $ pip install tinkoff-investments
 $ pip install -U aiogram
 ```
 ### Brokerage account
-Open brokerage account [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) and top up your account.
+Open brokerage account [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) and top up your account:
+1. "Margin trading" must be enabled 
 
 Do not forget to take TOKEN for API trading.
 
