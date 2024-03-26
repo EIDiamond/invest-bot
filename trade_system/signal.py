@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 class SignalType(enum.IntEnum):
     LONG = 0
     SHORT = 1
+    CLOSE = 2
 
 
 @dataclass(frozen=True, eq=False, repr=True)
