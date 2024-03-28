@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2024-03-27
+### Added
+- Ability to close position by strategy singnal (SignalType.CLOSE = 2). 
+
 ## 2023-08-20
 ### Fixed
 - Calculation available money on account was changed. Now, calculation method consider short positions.
 - A few stability changes
-
 
 ## 2023-08-12
 ### Fixed
